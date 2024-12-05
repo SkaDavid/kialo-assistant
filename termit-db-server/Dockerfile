@@ -8,15 +8,29 @@ ENV GRAPHDB_INSTALL_DIR=/opt/graphdb/dist
 
 WORKDIR ${GRAPHDB_HOME}
 
+# Install libs related to RDF processing
+### for arm64
+RUN if command -v apt >/dev/null; then \
+    apt update && \
+    apt install -y python3-rdflib && \
+    apt install -y liburi-perl; \
+fi
+
+### for amd64
+RUN if command -v apk >/dev/null; then \
+    apk add py3-rdflib && \
+    apk add perl-uri; \
+fi
+
 # Copy our custom ruleset
 COPY rulesets rulesets
 
-# Copy initialization data and repository config
-COPY init-data /root/graphdb-import
-COPY init-config /termit-repo-config
-COPY repo-init.sh ${GRAPHDB_INSTALL_DIR}/repo-init.sh
+# Copy scripts
+COPY bin/* ${GRAPHDB_INSTALL_DIR}/bin/
 
 EXPOSE 7200
 
-CMD ${GRAPHDB_INSTALL_DIR}/repo-init.sh /termit-repo-config ${GRAPHDB_HOME} & ${GRAPHDB_INSTALL_DIR}/bin/graphdb -Dgraphdb.home=${GRAPHDB_HOME} -Dgraphdb.logback=${GRAPHDB_INSTALL_DIR}/conf/logback.xml
-
+# Assuming following input directories:
+#     - /repo-config and data -- configuration ttl files to create repositories
+#     - /root/graphdb-import -- files that initialize/import data to specific repositories
+CMD ${GRAPHDB_INSTALL_DIR}/bin/repo-init.sh /repo-config ${GRAPHDB_HOME} & ${GRAPHDB_INSTALL_DIR}/bin/graphdb -Dgraphdb.home=${GRAPHDB_HOME} -Dgraphdb.logback=${GRAPHDB_INSTALL_DIR}/conf/logback.xml
