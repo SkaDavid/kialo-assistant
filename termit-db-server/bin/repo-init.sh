@@ -73,6 +73,27 @@ for DIR in ${DATA_DIR}/*/; do
 
     echo "INFO: Updating data in repository $REPO_NAME ..."
 
+    find ${DATA_DIR}/${REPO_NAME} -name '.target-graph' | while read CONTEXT_FILE; do
+        CONTEXT=$(cat "$CONTEXT_FILE")
+
+        if [ -z "$CONTEXT" ]; then
+            echo "ERROR: Target graph is not specified in '$CONTEXT_FILE'."
+            exit 1
+        fi
+
+	echo "INFO: Updating graph '$CONTEXT' defined in '$CONTEXT_FILE'... "
+
+        CONTEXT_DIR=$(dirname "$CONTEXT_FILE")
+        find  ${CONTEXT_DIR} -name '*.ttl' | while read DATA_FILE; do
+            echo "INFO: Appending triples to context '${CONTEXT}' with content from file ${DATA_FILE}."
+            $SCRIPT_DIR/rdf4j-deploy-context.sh -C 'text/turtle' -s http://localhost:7200 -r ${REPO_NAME} -c ${CONTEXT} ${DATA_FILE}
+        done
+        find  ${CONTEXT_DIR} -name '*.rdf' | while read DATA_FILE; do
+            echo "INFO: Appending triples to context '${CONTEXT}' with content from file ${DATA_FILE}."
+            $SCRIPT_DIR/rdf4j-deploy-context.sh -C 'application/rdf+xml' -s http://localhost:7200 -r ${REPO_NAME} -c ${CONTEXT} ${DATA_FILE}
+        done
+    done
+
     find ${DATA_DIR}/${REPO_NAME} -name '*.trig' | while read DATA_FILE; do
 
         echo "INFO: Replacing contexts with data from file ${DATA_FILE}."
