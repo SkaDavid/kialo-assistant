@@ -1,5 +1,12 @@
 PREFIX :<http://www.ontotext.com/connectors/lucene#>
 PREFIX inst:<http://www.ontotext.com/connectors/lucene/instance#>
+
+DELETE {
+  inst:defcom_index :dropConnector ?cntStr .
+} WHERE {
+  inst:defcom_index :listConnectors ?cntStr .
+};
+
 INSERT DATA {
 	inst:defcom_index :createConnector '''
 {
