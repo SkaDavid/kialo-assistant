@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:bio="http://purl.org/vocab/bio/0.1/" xmlns:dc="http://purl.org/dc/terms/" xmlns:vann="http://purl.org/vocab/vann/" xmlns:dcterm="http://purl.org/dc/terms/" xmlns:cc="http://web.resource.org/cc/" xmlns:foaf="http://xmlns.com/foaf/0.1/">
+<rdf:RDF
+xml:base="http://onto.fel.cvut.cz/ontologies/termit"
+xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:bio="http://purl.org/vocab/bio/0.1/" xmlns:dc="http://purl.org/dc/terms/" xmlns:vann="http://purl.org/vocab/vann/" xmlns:dcterm="http://purl.org/dc/terms/" xmlns:cc="http://web.resource.org/cc/" xmlns:foaf="http://xmlns.com/foaf/0.1/">
   <owl:Ontology rdf:about="http://purl.org/vocab/vann/">
     <dc:title xml:lang="en">VANN: A vocabulary for annotating vocabulary descriptions</dc:title>
     <dc:date>2010-06-07</dc:date>
