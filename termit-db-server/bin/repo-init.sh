@@ -84,10 +84,16 @@ for DIR in ${DATA_DIR}/*/; do
 	echo "INFO: Updating graph '$CONTEXT' defined in '$CONTEXT_FILE'... "
 
         CONTEXT_DIR=$(dirname "$CONTEXT_FILE")
+
+	echo "INFO: Clearing graph '$CONTEXT'... "
+        EMPTY_FILE=$(mktemp)
+        $SCRIPT_DIR/rdf4j-deploy-context.sh -R -C 'text/turtle' -s http://localhost:7200 -r ${REPO_NAME} -c ${CONTEXT} ${EMPTY_FILE}
+
         find  ${CONTEXT_DIR} -name '*.ttl' | while read DATA_FILE; do
             echo "INFO: Appending triples to context '${CONTEXT}' with content from file ${DATA_FILE}."
             $SCRIPT_DIR/rdf4j-deploy-context.sh -C 'text/turtle' -s http://localhost:7200 -r ${REPO_NAME} -c ${CONTEXT} ${DATA_FILE}
         done
+
         find  ${CONTEXT_DIR} -name '*.rdf' | while read DATA_FILE; do
             echo "INFO: Appending triples to context '${CONTEXT}' with content from file ${DATA_FILE}."
             $SCRIPT_DIR/rdf4j-deploy-context.sh -C 'application/rdf+xml' -s http://localhost:7200 -r ${REPO_NAME} -c ${CONTEXT} ${DATA_FILE}
