@@ -20,7 +20,9 @@ restart_application() {
 }
 
 
-echo "INFO: Building safety_viz image ..."
+echo "INFO: Pulling changes LKPR distribution configuration ..."
+git pull
+echo "INFO: Building safety_viz docker image ..."
 build_safety_viz_image
 echo "INFO: Starting LKPR deployment ..."
 restart_application
