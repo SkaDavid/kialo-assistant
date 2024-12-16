@@ -1,0 +1,4 @@
+services:
+  nginx:
+    volumes: !override
+      - ./nginx/nginx.conf:/etc/nginx/templates/nginx.conf.template:ro
