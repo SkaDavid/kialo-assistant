@@ -1,0 +1,4 @@
+services:
+  db-server:
+    ports:
+      - "127.0.0.1:7205:7200"
