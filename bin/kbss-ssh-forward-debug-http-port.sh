@@ -1,0 +1,6 @@
+#!/bin/bash
+
+REMOTE_GRAPHDB_PORT=5005
+LOCAL_GRAPHDB_PORT=5005
+
+ssh -f -N -L ${LOCAL_GRAPHDB_PORT}:localhost:${REMOTE_GRAPHDB_PORT} kbss.felk.cvut.cz
