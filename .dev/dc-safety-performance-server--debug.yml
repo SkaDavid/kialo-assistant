@@ -2,5 +2,4 @@ services:
   safety-performance-server:
     ports:
       - "127.0.0.1:${JAVA_DEBUG_SAFETY_PERFORMANCE_SERVER_PORT:-5005}:5005"
-    environment:
-      JAVA_OPTS: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
+    entrypoint: ["java", "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:${JAVA_DEBUG_SAFETY_PERFORMANCE_SERVER_PORT:-5005}", "-jar", "/lkpr-safety-performance.jar"]
