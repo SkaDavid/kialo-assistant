@@ -1,0 +1,14 @@
+services:
+  nginx:
+    depends_on: !reset null
+      - safety-performance
+      - s-pipes-engine
+  auth-server: !reset null
+  auth-server-db: !reset null
+  termit: !reset null
+  termit-server: !reset null
+  termit-db-server: !reset null
+  db-server-proxy: !reset null
+  ontographer: !reset null
+  annotace-server: !reset null
+
