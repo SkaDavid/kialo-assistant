@@ -1,5 +1,21 @@
 # 2024 LKPR Distribution
 
 To deploy this distribution:
-- copy or mount data from [project shared data folder](https://campuscvut-my.sharepoint.com/:f:/r/personal/lalisand_cvut_cz/Documents/Projekty/CL01000136/Data?csf=1&web=1&e=pqGdV9) to `../../shared/data`.
+- Set `SHARED_FOLDER` to the data folder containing csv files and notebooks. By default `SHARED_FOLDER=./Data`.
 - execute `docker-compose up`
+
+## Running Behind Apache Proxy
+Add a location to virtual host in `httpd-vhosts.conf`:
+```
+<VirtualHost *:80>
+    <Location APP_ROOT_PATH>
+        ProxyPass http://localhost:1234 nocanon upgrade=websocket
+        ProxyPassReverse http://localhost:1234
+    </Location>
+</VirtualHost>    
+```
+
+Change the path replace the placeholder `APP_ROOT_PATH` with the value of the variable with the same name `APP_ROOT_PATH`
+in `.evn` file, e.g. `/lkpr`. 
+
+The `upgrade=websocket` in the `ProxyPass` directive is necessary for the scipy service allowing to run jupyter notebooks:
