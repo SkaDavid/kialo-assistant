@@ -2,6 +2,8 @@
 
 To deploy this distribution:
 - Set `SHARED_FOLDER` to the data folder containing csv files and notebooks. By default `SHARED_FOLDER=./Data`.
+- To ensure jupyter lab has permissions for files in `SHARED_FOLDER` set the `SCIPY_USER_ID` (default `1000`) and 
+  `SCIPY_USER_GROUP` (default `users`) to the user id of the owner `SHARED_FOLDER` and the owner's group respectively.  
 - execute `docker-compose up`
 
 ## Running Behind Apache Proxy
