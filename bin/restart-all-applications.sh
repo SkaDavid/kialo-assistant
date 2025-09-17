@@ -13,8 +13,7 @@ build_safety_viz_image() {
 
 
 restart_application() {
-  # workaround to docker-compose pull, it does not work due to safety-performance service
-  docker-compose pull nginx auth-server-db auth-server termit-server db-server-proxy annotace-server termit ontographer safety-performance-server s-pipes-engine db-server scipy auth-server-db auth-server termit-server annotace-server db-server
+  docker pull
   docker-compose down
   docker-compose up -d
 }
