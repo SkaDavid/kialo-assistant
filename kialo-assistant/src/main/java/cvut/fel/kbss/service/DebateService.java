@@ -1,5 +1,8 @@
 package cvut.fel.kbss.service;
 
+import cvut.fel.kbss.exception.APIkeyNotFoundException;
+import cvut.fel.kbss.exception.OpenAINotRespondingException;
+import cvut.fel.kbss.exception.ThesisNotDefinedException;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,13 +19,12 @@ public class DebateService {
     @Value("${openai.key}")
     String secret_key;
 
-    public String createDebate(String thesis) {
-        // TODO vyjimky
+    public String createDebate(String thesis) throws ThesisNotDefinedException, APIkeyNotFoundException, OpenAINotRespondingException {
         if (thesis == null || thesis.isEmpty()) {
-            return "Thesis is empty";
+            throw new ThesisNotDefinedException("Thesis was not found");
         }
         if(secret_key == null || secret_key.isEmpty()){
-            return "API key is not defined";
+            throw new APIkeyNotFoundException("Open Api's key was not found");
         }
         String requestBody = createRequestBody(thesis);
         HttpResponse<String> response = sendPostRequest(requestBody);
@@ -40,7 +42,7 @@ public class DebateService {
         return firstContent.getString("text");
     }
 
-    private HttpResponse<String> sendPostRequest(String requestBody){
+    private HttpResponse<String> sendPostRequest(String requestBody) throws OpenAINotRespondingException {
         try (HttpClient client = HttpClient.newHttpClient()) {
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create("https://api.openai.com/v1/responses"))
@@ -52,9 +54,7 @@ public class DebateService {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
             return response;
         } catch (Exception e) {
-            // TODO
-            return null;
-//            return "Error calling OpenAI API: " + e.getMessage();
+            throw new OpenAINotRespondingException("Connection to OpenAI refused", e);
         }
     }
 
