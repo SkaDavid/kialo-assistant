@@ -1,0 +1,26 @@
+{
+  "manifest_version": 3,
+  "name": "Assistant extension",
+  "version": "1.0",
+
+  "description": "Assistant extension",
+
+  "permissions": ["sidePanel", "scripting", "activeTab", "identity", "storage"], 
+  "host_permissions": ["https://www.kialo.com/*", "http://localhost:8082/*", "http://localhost:1234/*"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://www.kialo.com/*"],
+      "js": ["content.js"]
+    }
+  ],
+  "action": {
+    "default_icon": "assets/icon.png",
+    "default_title": "Kialo extension"
+  },
+  "side_panel": {
+    "default_path": "sidepanel.html"
+  }
+}
