@@ -1,5 +1,17 @@
 # Kialo Assistant extension prototype
 
+
+## Deployment
+- Generate an openAI API token and add it to your system variables under the "OPENAI_API_KEY" name
+- Open "chrome://extensions" in developer mode
+    - Click on "Load unpacked" and select "kialo-extension" folder from the root directory of the project
+    - Copy extensions ID shown in the chrome://extension menu
+- execute `docker compose up`
+- Open keycloak admin console and log in. Navigate to realms -> termit -> clients -> extension and put "https://<EXTENSION_ID>.chromiumapp.org/*" into "Valid redirect URI" and "https://<EXTENSION_ID>.chromiumapp.org/" into "Web origins".
+- Open the extension in Chrome's extension window (The button looks like a puzzle piece in the top right).
+
+## About
+
 This repo is a prototype application to showcase what is or isn't possible when creating an extension for Kialo.com.
 The extension makes it possible to generate a list of pro and con arguments for a selected thesis. After reviewing and
 selecting arguments, the extension then makes a new debate on Kialo.com and inputs generated arguments into that debate.
@@ -29,13 +41,3 @@ was used, where the app supplies a JSON schema with each request. This schema ca
 
 Secondly, to showcase implementation of a SSO access to the backend. Keycloak was used to accomplish this. When logging into the extension,
 a google account can be used. User can then use any part of the backend with a single access token.
-
-
-## To deploy this code:
-- Generate an openAI API token and add it to your system variables under the "OPENAI_API_KEY" name
-- Open "chrome://extensions" in developer mode
-  - Click on "Load unpacked" and select "kialo-extension" folder
-  - Copy extensions ID
-- execute `docker-compose up`
-- Open keycloak admin console and log in. Navigate to realms -> termit -> clients -> extension and put "https://<EXTENSION_ID>.chromiumapp.org/*" into "Valid redirect URI" and "https://<EXTENSION_ID>.chromiumapp.org/" into "Web origins".
-- Log in to Kialo.com in Google Chrome and open the extension.
