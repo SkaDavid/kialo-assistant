@@ -3,8 +3,16 @@ package cvut.fel.kbss.service;
 import cvut.fel.kbss.exception.APIkeyNotFoundException;
 import cvut.fel.kbss.exception.OpenAINotRespondingException;
 import cvut.fel.kbss.exception.ThesisNotDefinedException;
+import cvut.fel.kbss.model.Argument;
+import cvut.fel.kbss.model.ArgumentType;
+import cvut.fel.kbss.model.Debate;
+import cvut.fel.kbss.model.User;
+import cvut.fel.kbss.repository.ArgumentRepository;
+import cvut.fel.kbss.repository.DebateRepository;
+import cvut.fel.kbss.repository.UserRepository;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -13,13 +21,107 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class DebateService {
     @Value("${openai.key}")
     String secret_key;
 
-    public String createDebate(String thesis) throws ThesisNotDefinedException, APIkeyNotFoundException, OpenAINotRespondingException {
+    private final UserRepository userRepository;
+    private final DebateRepository debateRepository;
+    private final ArgumentRepository argumentRepository;
+
+    @Autowired
+    public DebateService(UserRepository userRepository, DebateRepository debateRepository, ArgumentRepository argumentRepository){
+        this.userRepository = userRepository;
+        this.debateRepository = debateRepository;
+        this.argumentRepository = argumentRepository;
+    }
+
+
+    public String createDebate(String topic, String thesis, Long ownerId){
+        Optional<User> ownerOpt = userRepository.findById(ownerId.toString());
+        if(ownerOpt.isEmpty()){
+            return "No success sucker";
+        }
+
+        User owner = ownerOpt.get();
+        Debate debate = new Debate();
+        Argument argument = new Argument(thesis, ArgumentType.THESIS, null, owner, debate);
+        List<Argument> newList = new ArrayList<>();
+        newList.add(argument);
+
+        debate.setOwner(owner);
+        debate.setTitle(topic);
+        debate.setArguments(newList);
+
+        debateRepository.save(debate);
+        return "Success";
+    }
+
+    public Debate getDebateByTopic(String topic){
+        List<Debate> debates = debateRepository.findByTitle(topic);
+        if(!debates.isEmpty()){
+            return debates.getFirst();
+        }
+        return new Debate();
+    }
+
+
+
+    public String createArgument(String text, ArgumentType type, Long parentId, Long debateId, Long userId){
+        Optional<User> ownerOpt = userRepository.findById(userId.toString());
+        if(ownerOpt.isEmpty()){
+            return null;
+        }
+        Optional<Argument> parentOpt = argumentRepository.findById(parentId.toString());
+        if(parentOpt.isEmpty()){
+            return null;
+        }
+        Optional<Debate> debateOpt = debateRepository.findById(debateId.toString());
+        if(debateOpt.isEmpty()){
+            return null;
+        }
+        Debate debate = debateOpt.get();
+        User owner = ownerOpt.get();
+        Argument parent = parentOpt.get();
+
+        Argument argument = new Argument();
+        argument.setDebate(debate);
+        argument.setOwner(owner);
+        argument.setParent(parent);
+        argument.setType(type);
+        argument.setText(text);
+
+        List<Argument> debateArguments = debate.getArguments();
+        debateArguments.add(argument);
+        debate.setArguments(debateArguments);
+
+        debateRepository.save(debate);
+        return "good";
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    public String generateDebate(String thesis) throws ThesisNotDefinedException, APIkeyNotFoundException, OpenAINotRespondingException {
         if (thesis == null || thesis.isEmpty()) {
             throw new ThesisNotDefinedException("Thesis was not found");
         }
@@ -124,5 +226,9 @@ public class DebateService {
          An arguments is always a string.
          Do not include any additional text or explanation.
          """.formatted(thesis);
+    }
+
+    public List<Debate> findAll() {
+        return debateRepository.findAll();
     }
 }

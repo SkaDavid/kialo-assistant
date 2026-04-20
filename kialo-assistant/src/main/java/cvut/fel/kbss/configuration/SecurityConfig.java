@@ -12,33 +12,17 @@ import org.springframework.security.config.Customizer;
 @EnableWebSecurity
 public class SecurityConfig {
 
-//    @Bean
-//    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-//        http
-//                .csrf(csrf -> csrf.disable())
-//                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-//                .authorizeHttpRequests(auth -> auth
-//                        .requestMatchers("/public/**", "/actuator/health").permitAll()
-//                        .anyRequest().authenticated()
-//                )
-//                .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
-//        return http.build();
-//    }
-
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                // Vypne CSRF - nutné pro H2 konzoli a testování POST požadavků
                 .csrf(csrf -> csrf.disable())
-
-                // Povolí přístup do H2 konzole (pokud ji máš v rámci aplikace)
-                .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))
-
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // Toto povolí ÚPLNĚ VŠECHNO bez přihlášení
-                        .anyRequest().permitAll()
-                );
-
+                        .requestMatchers("/public/**", "/actuator/health").permitAll()
+                        .anyRequest().authenticated()
+                )
+                .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
         return http.build();
     }
+
 }
