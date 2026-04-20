@@ -50,9 +50,9 @@ public class DebateController {
 
     }
 
-    @GetMapping("/{topic}")
-    public ResponseEntity<Debate> getDebateByTopic(@PathVariable String topic){
-        Debate debate = debateService.getDebateByTopic(topic);
+    @GetMapping("/{id}")
+    public ResponseEntity<Debate> getDebate(@PathVariable Long id){
+        Debate debate = debateService.getDebate(id);
         return ResponseEntity.ok(debate);
     }
 

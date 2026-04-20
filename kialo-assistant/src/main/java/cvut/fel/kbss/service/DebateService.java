@@ -64,10 +64,10 @@ public class DebateService {
         return "Success";
     }
 
-    public Debate getDebateByTopic(String topic){
-        List<Debate> debates = debateRepository.findByTitle(topic);
-        if(!debates.isEmpty()){
-            return debates.getFirst();
+    public Debate getDebate(Long id){
+        Optional<Debate> debate = debateRepository.findById(id.toString());
+        if(debate.isPresent()){
+            return debate.get();
         }
         return new Debate();
     }
