@@ -8,12 +8,10 @@ import lombok.Setter;
 @Setter
 public class NewDebateDto {
     private String topic;
-    private Long ownerId;
     private String thesis;
 
-    public NewDebateDto(String topic, Long ownerId, String thesis) {
+    public NewDebateDto(String topic, String thesis) {
         this.topic = topic;
-        this.ownerId = ownerId;
         this.thesis = thesis;
     }
 }

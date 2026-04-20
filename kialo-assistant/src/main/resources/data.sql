@@ -1,7 +1,7 @@
 -- 1. Vytvoření uživatelů (Tabulka app_users dle @Table(name="app_users"))
-INSERT INTO app_users (id, username) VALUES (1, 'Jan_Novak');
-INSERT INTO app_users (id, username) VALUES (2, 'Marie_Cerna');
-INSERT INTO app_users (id, username) VALUES (3, 'Petr_Svoboda');
+INSERT INTO app_users (id, username, keycloak_id) VALUES (1, 'Jan_Novak', 1);
+INSERT INTO app_users (id, username, keycloak_id) VALUES (2, 'Marie_Cerna', 2);
+INSERT INTO app_users (id, username, keycloak_id) VALUES (3, 'Petr_Svoboda', 3);
 
 -- 2. Vytvoření debat (Tabulka Debate, vlastník namapován na user_id)
 INSERT INTO debate (id, title, user_id) VALUES (1, 'Budoucnost AI v medicíně', 1);
@@ -47,6 +47,6 @@ INSERT INTO argument (id, text, type, debate_id, user_id, parent_id)
 VALUES (12, 'Firmy mohou díky HO výrazně ušetřit na nákladech za pronájem kanceláří.', 'PRO', 2, 3, 7);
 
 
-ALTER TABLE app_users ALTER COLUMN id RESTART WITH 4;
-ALTER TABLE debate ALTER COLUMN id RESTART WITH 3;
-ALTER TABLE argument ALTER COLUMN id RESTART WITH 13;
+ALTER TABLE app_users ALTER COLUMN id RESTART WITH 5;
+ALTER TABLE debate ALTER COLUMN id RESTART WITH 5;
+ALTER TABLE argument ALTER COLUMN id RESTART WITH 15;

@@ -7,8 +7,10 @@ import cvut.fel.kbss.exception.OpenAINotRespondingException;
 import cvut.fel.kbss.exception.ThesisNotDefinedException;
 import cvut.fel.kbss.model.Debate;
 import cvut.fel.kbss.service.DebateService;
+import cvut.fel.kbss.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,18 +20,20 @@ import java.util.List;
 @RequestMapping("debate")
 public class DebateController {
     private final DebateService debateService;
-
+    private final UserService userService;
     @Autowired
-    public DebateController(DebateService debateService){
+    public DebateController(DebateService debateService, UserService userService){
         this.debateService = debateService;
+        this.userService = userService;
     }
 
     @PostMapping
-    public ResponseEntity<String> createDebate(@RequestBody NewDebateDto dto){
+    public ResponseEntity<String> createDebate(@RequestBody NewDebateDto dto, JwtAuthenticationToken token){
+        String keycloakId = token.getToken().getSubject();
         String result = this.debateService.createDebate(
                 dto.getTopic(),
                 dto.getThesis(),
-                dto.getOwnerId()
+                keycloakId
         );
         if(result != null){
             return ResponseEntity.ok("Great");

@@ -23,4 +23,7 @@ public class User {
     @JsonIgnore
     @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL)
     private List<Debate> debate;
+
+    @Column(name = "keycloak_id", unique = true)
+    private String keycloakId;
 }

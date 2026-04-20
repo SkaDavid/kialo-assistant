@@ -14,8 +14,7 @@ const CreateDebate = () => {
 
     const dto = {
       topic: topic,
-      thesis: thesis,
-      ownerId: "1"
+      thesis: thesis
     }
 
     const json_dto = JSON.stringify(dto);

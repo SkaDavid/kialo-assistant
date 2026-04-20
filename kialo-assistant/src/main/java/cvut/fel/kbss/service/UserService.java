@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 
 @Service
@@ -19,12 +20,21 @@ public class UserService {
     }
 
     @Transactional
-    public String persistUser(String username){
+    public String persistUser(String username, String id){
         System.out.println(username);
         User user = new User();
         user.setUsername(username);
+        user.setKeycloakId(id);
         userRepository.save(user);
         return username;
+    }
+
+    @Transactional
+    public void syncUser(String username, String keyCloakId){
+        Optional<User> userOpt = userRepository.findByKeycloakId(keyCloakId);
+        if(userOpt.isEmpty()){
+            persistUser(username, keyCloakId);
+        }
     }
 
 

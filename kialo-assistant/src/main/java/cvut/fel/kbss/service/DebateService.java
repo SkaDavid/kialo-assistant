@@ -15,6 +15,7 @@ import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -42,10 +43,11 @@ public class DebateService {
     }
 
 
-    public String createDebate(String topic, String thesis, Long ownerId){
-        Optional<User> ownerOpt = userRepository.findById(ownerId.toString());
+    @Transactional
+    public String createDebate(String topic, String thesis, String keyCloakId){
+        Optional<User> ownerOpt = userRepository.findByKeycloakId(keyCloakId);
         if(ownerOpt.isEmpty()){
-            return "No success sucker";
+            return "No success finding the user";
         }
 
         User owner = ownerOpt.get();

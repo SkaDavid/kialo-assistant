@@ -20,7 +20,6 @@ const Index = () => {
             }
         });
         const data = await response.json();
-        console.log(data);
         setDebates(data);
       } catch (error) {
         console.error("Chyba při načítání:", error);
@@ -29,7 +28,7 @@ const Index = () => {
 
     fetchData();
   }, []);
-  if (!debates) return <p>Nastala chyba</p>;
+  if (!debates) return <p>Načítání</p>;
 
   return (
     <div className="debate-container">      
