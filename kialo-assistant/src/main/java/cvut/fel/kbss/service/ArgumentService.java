@@ -10,6 +10,7 @@ import cvut.fel.kbss.model.User;
 import cvut.fel.kbss.repository.ArgumentRepository;
 import cvut.fel.kbss.repository.DebateRepository;
 import cvut.fel.kbss.repository.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,17 +35,11 @@ public class ArgumentService {
 
     @Transactional
     public ArgumentResponseDto createArgument(String text, ArgumentType type, Long parentId, Long debateId, Long userId){
-        Optional<User> ownerOpt = userRepository.findById(userId.toString());
-        if(ownerOpt.isEmpty()){
-            return null;
-        }
-        Optional<Argument> parentOpt = argumentRepository.findById(parentId.toString());
-        if(parentOpt.isEmpty()){
-            return null;
-        }
-        Optional<Debate> debateOpt = debateRepository.findById(debateId.toString());
-        if(debateOpt.isEmpty()){
-            return null;
+        Optional<User> ownerOpt = userRepository.findById(userId);
+        Optional<Argument> parentOpt = argumentRepository.findById(parentId);
+        Optional<Debate> debateOpt = debateRepository.findById(debateId);
+        if(ownerOpt.isEmpty() || parentOpt.isEmpty() || debateOpt.isEmpty()){
+            throw new EntityNotFoundException();
         }
         Debate debate = debateOpt.get();
         User owner = ownerOpt.get();

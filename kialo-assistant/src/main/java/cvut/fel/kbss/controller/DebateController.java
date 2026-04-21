@@ -50,10 +50,7 @@ public class DebateController {
     @GetMapping("/{id}")
     public ResponseEntity<DebateResponseDto> getDebate(@PathVariable Long id) throws DebateNotFoundException {
         DebateResponseDto debate = debateService.getDebate(id);
-        if(debate != null){
-            return ResponseEntity.status(HttpStatus.OK).body(debate);
-        }
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        return ResponseEntity.status(HttpStatus.OK).body(debate);
     }
 
 
@@ -66,17 +63,9 @@ public class DebateController {
     /*  old ai stuff  */
 
     @PostMapping(value = "/ai")
-    public ResponseEntity<String> postAI(@RequestBody String thesis){
+    public ResponseEntity<String> postAI(@RequestBody String thesis) throws APIkeyNotFoundException, OpenAINotRespondingException, ThesisNotDefinedException {
         String result;
-        try{
-            result = debateService.generateDebate(thesis);
-        } catch(ThesisNotDefinedException e){
-            return ResponseEntity.badRequest().build();
-        } catch(OpenAINotRespondingException | APIkeyNotFoundException e){
-            return ResponseEntity.internalServerError().build();
-        }
-        if(!result.isEmpty()){
-            return ResponseEntity.ok(result);
-        } else return ResponseEntity.badRequest().build();
+        result = debateService.generateDebate(thesis);
+        return ResponseEntity.ok(result);
     }
 }

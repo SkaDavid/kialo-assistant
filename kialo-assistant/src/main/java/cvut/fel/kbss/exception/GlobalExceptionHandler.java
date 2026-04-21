@@ -33,4 +33,12 @@ public class GlobalExceptionHandler {
         body.put("message", "The content you are looking for was not found");
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
     }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Object> handleRest(Exception ex) {
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("message", "There is an unexpected error");
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body);
+    }
 }

@@ -66,7 +66,7 @@ public class DebateService {
 
     @Transactional
     public DebateResponseDto getDebate(Long id) throws DebateNotFoundException {
-        Optional<Debate> debate = debateRepository.findById(id.toString());
+        Optional<Debate> debate = debateRepository.findById(id);
         if(debate.isEmpty()){
             throw new DebateNotFoundException("Debate not found");
         }

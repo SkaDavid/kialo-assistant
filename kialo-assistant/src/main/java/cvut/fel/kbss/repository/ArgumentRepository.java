@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface ArgumentRepository extends JpaRepository<Argument, String> {
+public interface ArgumentRepository extends JpaRepository<Argument, Long> {
 
 }
 

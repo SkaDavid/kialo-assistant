@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface DebateRepository extends JpaRepository<Debate, String> {
+public interface DebateRepository extends JpaRepository<Debate, Long> {
     List<Debate> findByTitle(String title);
 }
 
