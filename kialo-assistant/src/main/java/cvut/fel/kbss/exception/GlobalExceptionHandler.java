@@ -19,14 +19,14 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
     }
     @ExceptionHandler({APIkeyNotFoundException.class, OpenAINotRespondingException.class})
-    public ResponseEntity<Object> handleThesisNotDefined(Exception ex) {
+    public ResponseEntity<Object> handleAiExceptions(Exception ex) {
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("timestamp", LocalDateTime.now());
         body.put("message", "AI features are not available at the moment");
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body);
     }
 
-    @ExceptionHandler({UserNotFoundException.class, DebateNotFoundException.class})
+    @ExceptionHandler({UserNotFoundException.class, DebateNotFoundException.class, ArgumentNotFoundException.class})
     public ResponseEntity<Object> handleNotFound(Exception ex) {
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("timestamp", LocalDateTime.now());

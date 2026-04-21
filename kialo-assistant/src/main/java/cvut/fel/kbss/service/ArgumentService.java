@@ -3,6 +3,9 @@ package cvut.fel.kbss.service;
 
 import cvut.fel.kbss.dto.Mapper;
 import cvut.fel.kbss.dto.response.ArgumentResponseDto;
+import cvut.fel.kbss.exception.ArgumentNotFoundException;
+import cvut.fel.kbss.exception.DebateNotFoundException;
+import cvut.fel.kbss.exception.UserNotFoundException;
 import cvut.fel.kbss.model.Argument;
 import cvut.fel.kbss.model.ArgumentType;
 import cvut.fel.kbss.model.Debate;
@@ -34,12 +37,18 @@ public class ArgumentService {
     }
 
     @Transactional
-    public ArgumentResponseDto createArgument(String text, ArgumentType type, Long parentId, Long debateId, Long userId){
+    public ArgumentResponseDto createArgument(String text, ArgumentType type, Long parentId, Long debateId, Long userId) throws UserNotFoundException, DebateNotFoundException, ArgumentNotFoundException {
         Optional<User> ownerOpt = userRepository.findById(userId);
         Optional<Argument> parentOpt = argumentRepository.findById(parentId);
         Optional<Debate> debateOpt = debateRepository.findById(debateId);
-        if(ownerOpt.isEmpty() || parentOpt.isEmpty() || debateOpt.isEmpty()){
-            throw new EntityNotFoundException();
+        if(ownerOpt.isEmpty()){
+            throw new UserNotFoundException("Owner not found");
+        }
+        if(parentOpt.isEmpty()){
+            throw new ArgumentNotFoundException("Parent not found");
+        }
+        if(debateOpt.isEmpty()){
+            throw new DebateNotFoundException("Debate not found");
         }
         Debate debate = debateOpt.get();
         User owner = ownerOpt.get();
@@ -55,8 +64,8 @@ public class ArgumentService {
         List<Argument> debateArguments = debate.getArguments();
         debateArguments.add(argument);
         debate.setArguments(debateArguments);
+        Argument newArgument = argumentRepository.save(argument);
 
-        ArgumentResponseDto response = mapper.toDto(argument);
-        return response;
+        return mapper.toDto(newArgument);
     }
 }
