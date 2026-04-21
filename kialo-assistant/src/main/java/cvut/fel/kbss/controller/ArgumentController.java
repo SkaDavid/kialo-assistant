@@ -26,7 +26,6 @@ public class ArgumentController {
         if(response != null){
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         }
-        //TODO nejaka jina reakce?
         return ResponseEntity.badRequest().build();
     }
 }

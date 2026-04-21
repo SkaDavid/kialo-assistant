@@ -63,7 +63,7 @@ public class DebateController {
 
 
 
-    /* TODO old ai stuff  */
+    /*  old ai stuff  */
 
     @PostMapping(value = "/ai")
     public ResponseEntity<String> postAI(@RequestBody String thesis){

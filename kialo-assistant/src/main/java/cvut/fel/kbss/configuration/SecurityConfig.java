@@ -54,22 +54,6 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
-//    @Bean
-//    public JwtAuthenticationConverter jwtAuthenticationConverter() {
-//        JwtGrantedAuthoritiesConverter converter = new JwtGrantedAuthoritiesConverter();
-//        converter.setAuthoritiesClaimName("realm_access");
-//        converter.setAuthorityPrefix("ROLE_");
-//
-//        JwtAuthenticationConverter jwtConverter = new JwtAuthenticationConverter();
-//        jwtConverter.setJwtGrantedAuthoritiesConverter(jwt -> {
-//            Map<String, Object> realmAccess = jwt.getClaim("realm_access");
-//            Collection<String> roles = (Collection<String>) realmAccess.get("roles");
-//            return roles.stream()
-//                    .map(SimpleGrantedAuthority::new)
-//                    .collect(Collectors.toList());
-//        });
-//        return jwtConverter;
-//    }
 
     @Bean
     public JwtAuthenticationConverter jwtAuthenticationConverter() {
