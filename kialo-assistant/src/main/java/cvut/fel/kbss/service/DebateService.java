@@ -1,5 +1,7 @@
 package cvut.fel.kbss.service;
 
+import cvut.fel.kbss.dto.Mapper;
+import cvut.fel.kbss.dto.response.DebateResponseDto;
 import cvut.fel.kbss.exception.APIkeyNotFoundException;
 import cvut.fel.kbss.exception.OpenAINotRespondingException;
 import cvut.fel.kbss.exception.ThesisNotDefinedException;
@@ -24,6 +26,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class DebateService {
@@ -32,19 +35,22 @@ public class DebateService {
 
     private final UserRepository userRepository;
     private final DebateRepository debateRepository;
+    private final Mapper mapper;
 
     @Autowired
-    public DebateService(UserRepository userRepository, DebateRepository debateRepository){
+    public DebateService(UserRepository userRepository, DebateRepository debateRepository, Mapper mapper){
         this.userRepository = userRepository;
         this.debateRepository = debateRepository;
+        this.mapper = mapper;
     }
 
 
     @Transactional
-    public String createDebate(String topic, String thesis, String keyCloakId){
+    public DebateResponseDto createDebate(String topic, String thesis, String keyCloakId){
         Optional<User> ownerOpt = userRepository.findByKeycloakId(keyCloakId);
         if(ownerOpt.isEmpty()){
-            return "No success finding the user";
+            //TODO exep
+            //return "No success finding the user";
         }
 
         User owner = ownerOpt.get();
@@ -57,19 +63,40 @@ public class DebateService {
         debate.setTitle(topic);
         debate.setArguments(newList);
 
-        debateRepository.save(debate);
-        return "Success";
+        Debate newDebate = debateRepository.save(debate);
+        return mapper.toDto(newDebate);
     }
 
-    public Debate getDebate(Long id){
+    @Transactional
+    public DebateResponseDto getDebate(Long id){
         Optional<Debate> debate = debateRepository.findById(id.toString());
         if(debate.isPresent()){
-            return debate.get();
+            return mapper.toDto(debate.get());
         }
-        return new Debate();
+        //TODO exep
+        return mapper.toDto(new Debate());
+    }
+
+    public List<DebateResponseDto> findAll() {
+        List<Debate> debates = debateRepository.findAll();
+        return debates.stream()
+                .map(debate -> mapper.toDto(debate))
+                .collect(Collectors.toList());
     }
 
 
+
+
+
+
+
+
+
+
+
+
+
+    /*  TODO Old ai stuff   */
 
     public String generateDebate(String thesis) throws ThesisNotDefinedException, APIkeyNotFoundException, OpenAINotRespondingException {
         if (thesis == null || thesis.isEmpty()) {
@@ -176,9 +203,5 @@ public class DebateService {
          An arguments is always a string.
          Do not include any additional text or explanation.
          """.formatted(thesis);
-    }
-
-    public List<Debate> findAll() {
-        return debateRepository.findAll();
     }
 }

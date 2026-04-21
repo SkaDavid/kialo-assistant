@@ -1,5 +1,7 @@
 package cvut.fel.kbss.service;
 
+import cvut.fel.kbss.dto.Mapper;
+import cvut.fel.kbss.dto.response.UserResponseDto;
 import cvut.fel.kbss.model.User;
 import cvut.fel.kbss.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,20 +15,22 @@ import java.util.Optional;
 @Service
 public class UserService {
     private final UserRepository userRepository;
+    private final Mapper mapper;
 
     @Autowired
-    public UserService(UserRepository userRepository){
+    public UserService(UserRepository userRepository, Mapper mapper){
         this.userRepository = userRepository;
+        this.mapper = mapper;
     }
 
     @Transactional
-    public String persistUser(String username, String id){
+    public UserResponseDto persistUser(String username, String id){
         System.out.println(username);
         User user = new User();
         user.setUsername(username);
         user.setKeycloakId(id);
-        userRepository.save(user);
-        return username;
+        User newUser = userRepository.save(user);
+        return mapper.toDto(newUser);
     }
 
     @Transactional
@@ -39,15 +43,11 @@ public class UserService {
 
 
     @Transactional
-    public User findUser(String username){
+    public UserResponseDto findUser(String username){
         List<User> users = this.userRepository.findByUsername(username);
         if(users.isEmpty()){
-            users = this.userRepository.findAll();
-            if(users.isEmpty()){
-                return new User();
-            }
-            return users.getFirst();
+            //TODO exe
         }
-        return users.getFirst();
+        return mapper.toDto(users.getFirst());
     }
 }

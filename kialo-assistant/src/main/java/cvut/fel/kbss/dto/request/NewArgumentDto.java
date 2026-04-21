@@ -1,4 +1,4 @@
-package cvut.fel.kbss.dto;
+package cvut.fel.kbss.dto.request;
 
 import cvut.fel.kbss.model.ArgumentType;
 import lombok.Getter;

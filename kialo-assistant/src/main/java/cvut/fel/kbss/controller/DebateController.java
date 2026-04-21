@@ -1,14 +1,17 @@
 package cvut.fel.kbss.controller;
 
-import cvut.fel.kbss.dto.NewArgumentDto;
-import cvut.fel.kbss.dto.NewDebateDto;
+import cvut.fel.kbss.dto.Mapper;
+import cvut.fel.kbss.dto.request.NewDebateDto;
+import cvut.fel.kbss.dto.response.ArgumentResponseDto;
+import cvut.fel.kbss.dto.response.DebateResponseDto;
 import cvut.fel.kbss.exception.APIkeyNotFoundException;
 import cvut.fel.kbss.exception.OpenAINotRespondingException;
 import cvut.fel.kbss.exception.ThesisNotDefinedException;
 import cvut.fel.kbss.model.Debate;
 import cvut.fel.kbss.service.DebateService;
-import cvut.fel.kbss.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.graphql.GraphQlProperties;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
@@ -20,42 +23,52 @@ import java.util.List;
 @RequestMapping("debate")
 public class DebateController {
     private final DebateService debateService;
-    private final UserService userService;
     @Autowired
-    public DebateController(DebateService debateService, UserService userService){
+    public DebateController(DebateService debateService){
         this.debateService = debateService;
-        this.userService = userService;
     }
 
     @PostMapping
-    public ResponseEntity<String> createDebate(@RequestBody NewDebateDto dto, JwtAuthenticationToken token){
+    public ResponseEntity<DebateResponseDto> createDebate(@RequestBody NewDebateDto dto, JwtAuthenticationToken token){
         String keycloakId = token.getToken().getSubject();
-        String result = this.debateService.createDebate(
+        DebateResponseDto response = this.debateService.createDebate(
                 dto.getTopic(),
                 dto.getThesis(),
                 keycloakId
         );
-        if(result != null){
-            return ResponseEntity.ok("Great");
+        if(response != null){
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
         }
+        //TODO Exe
         else return ResponseEntity.badRequest().build();
     }
 
     @GetMapping
-    public ResponseEntity<List<Debate>> getDebates(){
-        List<Debate> debates = debateService.findAll();
+    public ResponseEntity<List<DebateResponseDto>> getDebates(){
+        List<DebateResponseDto> debates = debateService.findAll();
         if(!debates.isEmpty()){
-            return ResponseEntity.ok(debates);
-        } else return ResponseEntity.badRequest().build();
+            return ResponseEntity.status(HttpStatus.OK).body(debates);
+        } else return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Debate> getDebate(@PathVariable Long id){
-        Debate debate = debateService.getDebate(id);
-        return ResponseEntity.ok(debate);
+    public ResponseEntity<DebateResponseDto> getDebate(@PathVariable Long id){
+        DebateResponseDto debate = debateService.getDebate(id);
+        if(debate != null){
+            return ResponseEntity.status(HttpStatus.OK).body(debate);
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
 
+
+
+
+
+
+
+
+    /* TODO old ai stuff  */
 
     @PostMapping(value = "/ai")
     public ResponseEntity<String> postAI(@RequestBody String thesis){
