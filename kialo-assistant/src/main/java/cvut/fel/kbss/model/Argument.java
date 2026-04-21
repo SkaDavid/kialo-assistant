@@ -6,6 +6,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
+
 @Getter
 @Setter
 @Entity
@@ -37,6 +39,9 @@ public class Argument {
     @ManyToOne
     @JoinColumn(name = "parent_id")
     private Argument parent;
+
+    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Argument> children;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
