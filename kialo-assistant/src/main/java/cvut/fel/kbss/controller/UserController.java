@@ -25,9 +25,6 @@ public class UserController {
     @GetMapping()
     public ResponseEntity<UserResponseDto> getUser(@RequestParam String username) throws UserNotFoundException {
         UserResponseDto user = this.userService.findUser(username);
-        if(user != null){
-            return ResponseEntity.status(HttpStatus.OK).body(user);
-        }
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        return ResponseEntity.status(HttpStatus.OK).body(user);
     }
 }

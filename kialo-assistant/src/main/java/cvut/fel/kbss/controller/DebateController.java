@@ -35,7 +35,6 @@ public class DebateController {
                 keycloakId
         );
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
-
     }
 
     @GetMapping
