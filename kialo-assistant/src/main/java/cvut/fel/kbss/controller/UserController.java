@@ -2,6 +2,7 @@ package cvut.fel.kbss.controller;
 
 import cvut.fel.kbss.dto.Mapper;
 import cvut.fel.kbss.dto.response.UserResponseDto;
+import cvut.fel.kbss.exception.UserNotFoundException;
 import cvut.fel.kbss.model.User;
 import cvut.fel.kbss.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +23,7 @@ public class UserController {
     }
 
     @GetMapping()
-    public ResponseEntity<UserResponseDto> getUser(@RequestParam String username){
+    public ResponseEntity<UserResponseDto> getUser(@RequestParam String username) throws UserNotFoundException {
         UserResponseDto user = this.userService.findUser(username);
         if(user != null){
             return ResponseEntity.status(HttpStatus.OK).body(user);

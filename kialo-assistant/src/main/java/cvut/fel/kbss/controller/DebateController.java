@@ -4,9 +4,7 @@ import cvut.fel.kbss.dto.Mapper;
 import cvut.fel.kbss.dto.request.NewDebateDto;
 import cvut.fel.kbss.dto.response.ArgumentResponseDto;
 import cvut.fel.kbss.dto.response.DebateResponseDto;
-import cvut.fel.kbss.exception.APIkeyNotFoundException;
-import cvut.fel.kbss.exception.OpenAINotRespondingException;
-import cvut.fel.kbss.exception.ThesisNotDefinedException;
+import cvut.fel.kbss.exception.*;
 import cvut.fel.kbss.model.Debate;
 import cvut.fel.kbss.service.DebateService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,18 +27,15 @@ public class DebateController {
     }
 
     @PostMapping
-    public ResponseEntity<DebateResponseDto> createDebate(@RequestBody NewDebateDto dto, JwtAuthenticationToken token){
+    public ResponseEntity<DebateResponseDto> createDebate(@RequestBody NewDebateDto dto, JwtAuthenticationToken token) throws UserNotFoundException {
         String keycloakId = token.getToken().getSubject();
         DebateResponseDto response = this.debateService.createDebate(
                 dto.getTopic(),
                 dto.getThesis(),
                 keycloakId
         );
-        if(response != null){
-            return ResponseEntity.status(HttpStatus.CREATED).body(response);
-        }
-        //TODO Exe
-        else return ResponseEntity.badRequest().build();
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+
     }
 
     @GetMapping
@@ -53,7 +48,7 @@ public class DebateController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<DebateResponseDto> getDebate(@PathVariable Long id){
+    public ResponseEntity<DebateResponseDto> getDebate(@PathVariable Long id) throws DebateNotFoundException {
         DebateResponseDto debate = debateService.getDebate(id);
         if(debate != null){
             return ResponseEntity.status(HttpStatus.OK).body(debate);

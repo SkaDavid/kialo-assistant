@@ -2,9 +2,7 @@ package cvut.fel.kbss.service;
 
 import cvut.fel.kbss.dto.Mapper;
 import cvut.fel.kbss.dto.response.DebateResponseDto;
-import cvut.fel.kbss.exception.APIkeyNotFoundException;
-import cvut.fel.kbss.exception.OpenAINotRespondingException;
-import cvut.fel.kbss.exception.ThesisNotDefinedException;
+import cvut.fel.kbss.exception.*;
 import cvut.fel.kbss.model.Argument;
 import cvut.fel.kbss.model.ArgumentType;
 import cvut.fel.kbss.model.Debate;
@@ -46,11 +44,10 @@ public class DebateService {
 
 
     @Transactional
-    public DebateResponseDto createDebate(String topic, String thesis, String keyCloakId){
+    public DebateResponseDto createDebate(String topic, String thesis, String keyCloakId) throws UserNotFoundException {
         Optional<User> ownerOpt = userRepository.findByKeycloakId(keyCloakId);
         if(ownerOpt.isEmpty()){
-            //TODO exep
-            //return "No success finding the user";
+            throw new UserNotFoundException("User not found");
         }
 
         User owner = ownerOpt.get();
@@ -68,13 +65,12 @@ public class DebateService {
     }
 
     @Transactional
-    public DebateResponseDto getDebate(Long id){
+    public DebateResponseDto getDebate(Long id) throws DebateNotFoundException {
         Optional<Debate> debate = debateRepository.findById(id.toString());
-        if(debate.isPresent()){
-            return mapper.toDto(debate.get());
+        if(debate.isEmpty()){
+            throw new DebateNotFoundException("Debate not found");
         }
-        //TODO exep
-        return mapper.toDto(new Debate());
+        return mapper.toDto(debate.get());
     }
 
     public List<DebateResponseDto> findAll() {
