@@ -80,6 +80,22 @@ public class DebateService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
+    public DebateResponseDto updateDebate(Long id, String newTitle, String keycloakId)
+            throws DebateNotFoundException, UnauthorizedAccessException {
+
+        Optional<Debate> debateOpt = debateRepository.findById(id);
+        if(debateOpt.isEmpty()){
+            throw new DebateNotFoundException("Debate not found");
+        }
+        Debate debate = debateOpt.get();
+        if (!debate.getOwner().getKeycloakId().equals(keycloakId)) {
+            throw new UnauthorizedAccessException("You are not the owner of this debate");
+        }
+        debate.setTitle(newTitle);
+        return mapper.toDto(debate);
+    }
+
 
 
 

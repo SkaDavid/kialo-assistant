@@ -88,4 +88,20 @@ public class ArgumentService {
         }
         argumentRepository.deleteById(argumentId);
     }
+
+    @Transactional
+    public ArgumentResponseDto updateArgument(Long id, String newText, String keycloakId)
+            throws ArgumentNotFoundException, UnauthorizedAccessException {
+
+        Optional<Argument> argumentOpt = argumentRepository.findById(id);
+        if(argumentOpt.isEmpty()){
+            throw new ArgumentNotFoundException("Argument not found");
+        }
+        Argument argument = argumentOpt.get();
+        if (!argument.getOwner().getKeycloakId().equals(keycloakId)) {
+            throw new UnauthorizedAccessException("You are not the owner of this argument");
+        }
+        argument.setText(newText);
+        return mapper.toDto(argument);
+    }
 }

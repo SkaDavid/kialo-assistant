@@ -1,8 +1,7 @@
 package cvut.fel.kbss.controller;
 
-
-import cvut.fel.kbss.dto.Mapper;
 import cvut.fel.kbss.dto.request.NewArgumentDto;
+import cvut.fel.kbss.dto.request.UpdateArgumentDto;
 import cvut.fel.kbss.dto.response.ArgumentResponseDto;
 import cvut.fel.kbss.exception.ArgumentNotFoundException;
 import cvut.fel.kbss.exception.DebateNotFoundException;
@@ -26,13 +25,24 @@ public class ArgumentController {
     }
 
     @PostMapping
-    public ResponseEntity<ArgumentResponseDto> createArgument(@RequestBody NewArgumentDto dto) throws UserNotFoundException, DebateNotFoundException, ArgumentNotFoundException {
+    public ResponseEntity<ArgumentResponseDto> createArgument(@RequestBody NewArgumentDto dto)
+            throws UserNotFoundException, DebateNotFoundException, ArgumentNotFoundException {
         ArgumentResponseDto response = this.argumentService.createArgument(dto.getText(), dto.getType(), dto.getParentId(), dto.getDebateId(), dto.getUserId());
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<ArgumentResponseDto> updateArgument(@PathVariable Long id, @RequestBody UpdateArgumentDto dto, JwtAuthenticationToken token)
+            throws ArgumentNotFoundException, UnauthorizedAccessException {
+
+        String keycloakId = token.getToken().getSubject();
+        ArgumentResponseDto argument = argumentService.updateArgument(id, dto.getText(), keycloakId);
+        return ResponseEntity.ok(argument);
+    }
+
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteArgument(@PathVariable Long id, JwtAuthenticationToken token) throws UnauthorizedAccessException, ArgumentNotFoundException, UserNotFoundException {
+    public ResponseEntity<Void> deleteArgument(@PathVariable Long id, JwtAuthenticationToken token)
+            throws UnauthorizedAccessException, ArgumentNotFoundException, UserNotFoundException {
         String keycloakId = token.getToken().getSubject();
         this.argumentService.deleteArgument(id, keycloakId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();

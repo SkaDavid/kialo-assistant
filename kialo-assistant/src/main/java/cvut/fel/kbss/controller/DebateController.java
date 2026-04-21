@@ -2,6 +2,7 @@ package cvut.fel.kbss.controller;
 
 import cvut.fel.kbss.dto.Mapper;
 import cvut.fel.kbss.dto.request.NewDebateDto;
+import cvut.fel.kbss.dto.request.UpdateDebateDto;
 import cvut.fel.kbss.dto.response.ArgumentResponseDto;
 import cvut.fel.kbss.dto.response.DebateResponseDto;
 import cvut.fel.kbss.exception.*;
@@ -27,7 +28,8 @@ public class DebateController {
     }
 
     @PostMapping
-    public ResponseEntity<DebateResponseDto> createDebate(@RequestBody NewDebateDto dto, JwtAuthenticationToken token) throws UserNotFoundException {
+    public ResponseEntity<DebateResponseDto> createDebate(@RequestBody NewDebateDto dto, JwtAuthenticationToken token)
+            throws UserNotFoundException {
         String keycloakId = token.getToken().getSubject();
         DebateResponseDto response = this.debateService.createDebate(
                 dto.getTopic(),
@@ -44,11 +46,20 @@ public class DebateController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<DebateResponseDto> getDebate(@PathVariable Long id) throws DebateNotFoundException {
+    public ResponseEntity<DebateResponseDto> getDebate(@PathVariable Long id)
+            throws DebateNotFoundException {
         DebateResponseDto debate = debateService.getDebate(id);
         return ResponseEntity.status(HttpStatus.OK).body(debate);
     }
 
+
+    @PutMapping("/{id}")
+    public ResponseEntity<DebateResponseDto> updateDebate(@PathVariable Long id, @RequestBody UpdateDebateDto dto, JwtAuthenticationToken token)
+            throws DebateNotFoundException, UnauthorizedAccessException  {
+        String keycloakId = token.getToken().getSubject();
+        DebateResponseDto debate = debateService.updateDebate(id, dto.getTopic(), keycloakId);
+        return ResponseEntity.ok(debate);
+    }
 
 
 
@@ -59,7 +70,8 @@ public class DebateController {
     /*  old ai stuff  */
 
     @PostMapping(value = "/ai")
-    public ResponseEntity<String> postAI(@RequestBody String thesis) throws APIkeyNotFoundException, OpenAINotRespondingException, ThesisNotDefinedException {
+    public ResponseEntity<String> postAI(@RequestBody String thesis)
+            throws APIkeyNotFoundException, OpenAINotRespondingException, ThesisNotDefinedException {
         String result;
         result = debateService.generateDebate(thesis);
         return ResponseEntity.ok(result);
