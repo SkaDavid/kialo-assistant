@@ -27,7 +27,6 @@ public class UserService {
 
     @Transactional
     public UserResponseDto persistUser(String username, String id){
-        System.out.println(username);
         User user = new User();
         user.setUsername(username);
         user.setKeycloakId(id);
