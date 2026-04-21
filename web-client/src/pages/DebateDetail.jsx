@@ -41,7 +41,7 @@ const DebateDetail = () => {
   if (!debate) return <p>Načítám detail debaty...</p>;
 
   const findParent = (argument, parentId) => {
-    return argument.parent?.id === parentId;
+    return argument.parent === parentId;
   }
 
 
@@ -51,7 +51,7 @@ const DebateDetail = () => {
       return;
     }
 
-    const parentIndex = activePath.indexOf(clickedArgument.parent.id);
+    const parentIndex = activePath.indexOf(clickedArgument.parent);
 
     if (parentIndex !== -1) {
       const newPath = activePath.slice(0, parentIndex + 1);
@@ -72,7 +72,7 @@ const DebateDetail = () => {
           <p>{thesis.owner.username}</p>
         </article>
       {activePath.map((parentId, index) => {
-          const children = debate.arguments.filter(arg => arg.parent?.id === parentId);
+          const children = debate.arguments.filter(arg => arg.parent === parentId);
           if (children.length === 0) return null;
           return (
             <div key={parentId} className='argContainer'>
