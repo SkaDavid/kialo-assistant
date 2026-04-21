@@ -19,6 +19,10 @@ public class ArgumentController {
 
     @PostMapping
     public ResponseEntity<String> createArgument(@RequestBody NewArgumentDto dto){
-        return ResponseEntity.ok("Good");
+        String response = this.argumentService.createArgument(dto.getText(), dto.getType(), dto.getParentId(), dto.getDebateId(), dto.getUserId());
+        if(response != null){
+            return ResponseEntity.ok("Ayo");
+        }
+        return ResponseEntity.badRequest().build();
     }
 }

@@ -56,22 +56,6 @@ public class DebateController {
         return ResponseEntity.ok(debate);
     }
 
-    @PostMapping("/argument")
-    public ResponseEntity<String> createArgument(@RequestBody NewArgumentDto dto){
-        String response = this.debateService.createArgument(dto.getText(), dto.getType(), dto.getParentId(), dto.getDebateId(), dto.getUserId());
-        if(response != null){
-            return ResponseEntity.ok("Ayo");
-        }
-        return ResponseEntity.badRequest().build();
-    }
-
-
-
-
-
-
-
-
 
     @PostMapping(value = "/ai")
     public ResponseEntity<String> postAI(@RequestBody String thesis){
