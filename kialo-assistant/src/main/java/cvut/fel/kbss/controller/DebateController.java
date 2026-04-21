@@ -41,10 +41,7 @@ public class DebateController {
     @GetMapping
     public ResponseEntity<List<DebateResponseDto>> getDebates(){
         List<DebateResponseDto> debates = debateService.findAll();
-        if(!debates.isEmpty()){
-            return ResponseEntity.status(HttpStatus.OK).body(debates);
-        } else return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-
+        return ResponseEntity.status(HttpStatus.OK).body(debates);
     }
 
     @GetMapping("/{id}")
