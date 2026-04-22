@@ -38,8 +38,9 @@ public class ArgumentService {
     }
 
     @Transactional
-    public ArgumentResponseDto createArgument(String text, ArgumentType type, Long parentId, Long debateId, Long userId) throws UserNotFoundException, DebateNotFoundException, ArgumentNotFoundException {
-        Optional<User> ownerOpt = userRepository.findById(userId);
+    public ArgumentResponseDto createArgument(String text, ArgumentType type, Long parentId, Long debateId, String userId)
+            throws UserNotFoundException, DebateNotFoundException, ArgumentNotFoundException {
+        Optional<User> ownerOpt = userRepository.findByKeycloakId(userId);
         Optional<Argument> parentOpt = argumentRepository.findById(parentId);
         Optional<Debate> debateOpt = debateRepository.findById(debateId);
         if(ownerOpt.isEmpty()){

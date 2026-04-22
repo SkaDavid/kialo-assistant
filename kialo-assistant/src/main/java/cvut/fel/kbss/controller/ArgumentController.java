@@ -25,9 +25,10 @@ public class ArgumentController {
     }
 
     @PostMapping
-    public ResponseEntity<ArgumentResponseDto> createArgument(@RequestBody NewArgumentDto dto)
+    public ResponseEntity<ArgumentResponseDto> createArgument(@RequestBody NewArgumentDto dto, JwtAuthenticationToken token)
             throws UserNotFoundException, DebateNotFoundException, ArgumentNotFoundException {
-        ArgumentResponseDto response = this.argumentService.createArgument(dto.getText(), dto.getType(), dto.getParentId(), dto.getDebateId(), dto.getUserId());
+        String keycloakId = token.getToken().getSubject();
+        ArgumentResponseDto response = this.argumentService.createArgument(dto.getText(), dto.getType(), dto.getParentId(), dto.getDebateId(), keycloakId);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
