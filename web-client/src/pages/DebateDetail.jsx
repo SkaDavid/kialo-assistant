@@ -143,7 +143,6 @@ const DebateDetail = () => {
       text: updateData.text,
       type: updateData.type
     }
-    console.log(dto);
     try {
       const response = await fetch(`http://localhost:8082/argument/${argumentId}`, {
         method: 'PUT',
