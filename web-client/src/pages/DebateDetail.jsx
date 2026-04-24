@@ -185,8 +185,14 @@ const DebateDetail = () => {
                     <p>{child.text}</p>
                     <p>{child.owner.username}</p>
                     <button onClick={(e) => handleOpenForm(e, child.id)}>Reagovat</button>
-                    <button onClick={(e) => handleDeleteArgument(e, child.id)}>Smazat argument</button>
-                    <button onClick={(e) => handleArgumentForm(e, child.id, child.type, child.text)}>Upravit</button>
+                    {
+                      keycloak.tokenParsed?.preferred_username === child.owner.username && (
+                        <div>
+                          <button onClick={(e) => handleDeleteArgument(e, child.id)}>Smazat argument</button>
+                          <button onClick={(e) => handleArgumentForm(e, child.id, child.type, child.text)}>Upravit</button>
+                        </div>
+                      )
+                    }
                   </article>
                   {replyArgId === child.id && (
                     <div className="reply-form" onClick={(e) => e.stopPropagation()}>

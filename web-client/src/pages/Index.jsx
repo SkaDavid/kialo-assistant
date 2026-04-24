@@ -72,7 +72,9 @@ const Index = () => {
             <p>{debate.arguments[0]?.text}</p>
             <p>{debate.owner.username}</p>
             <p><strong>{debate.visibility}</strong></p>
-            <button onClick={(e) => handleUpdateForm(e, debate.id)}>Upravit</button>
+            {keycloak.tokenParsed?.preferred_username === debate.owner.username && (
+              <button onClick={(e) => handleUpdateForm(e, debate.id)}>Upravit</button>
+            )}
             {
               updateDebateId === debate.id && 
               <div className="debateForm">
