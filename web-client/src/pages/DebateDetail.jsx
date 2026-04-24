@@ -12,6 +12,10 @@ const DebateDetail = () => {
   const [replyArgId, setReplyArgId] = useState(null);
   const [replyData, setReplyData] = useState({text: "", type: "PRO"});
 
+  const [updateArgId, setUpdateArgId] = useState(null);
+  const [updateData, setUpdateData] = useState({text: "", type: "PRO"});
+
+
   const navigate = useNavigate();
 
   const fetchData = async () => {
@@ -103,6 +107,62 @@ const DebateDetail = () => {
   const handleOpenForm = (e, childId) => {
     e.stopPropagation();
     setReplyArgId(childId);
+    setUpdateArgId(null);
+  }
+
+  const handleDeleteArgument = async (e, argumentId) => {
+    e.stopPropagation();
+    
+    try {
+      const response = await fetch(`http://localhost:8082/argument/${argumentId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${keycloak.token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      if(response.ok){
+        await fetchData();              
+      } else{
+        console.error("server vratil chybu")
+      }
+    } catch (error) {
+      console.error("Chyba:", error);
+    }
+  }
+
+  const handleArgumentForm = (e, argumentId, type, text) => {
+    e.stopPropagation();
+    setReplyArgId(null);
+    setUpdateData({type: type, text: text});
+    setUpdateArgId(argumentId);
+  }
+
+  const handleUpdateSubmit = async (argumentId) => {
+    const dto = {
+      text: updateData.text,
+      type: updateData.type
+    }
+    console.log(dto);
+    try {
+      const response = await fetch(`http://localhost:8082/argument/${argumentId}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${keycloak.token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(dto)
+      });
+      if(response.ok){
+        await fetchData();              
+        setUpdateArgId(null);            
+        setUpdateData({text: "", type: "PRO"}); 
+      } else{
+        console.error("server vratil chybu")
+      }
+    } catch (error) {
+      console.error("Chyba:", error);
+    }
   }
 
   
@@ -126,6 +186,8 @@ const DebateDetail = () => {
                     <p>{child.text}</p>
                     <p>{child.owner.username}</p>
                     <button onClick={(e) => handleOpenForm(e, child.id)}>Reagovat</button>
+                    <button onClick={(e) => handleDeleteArgument(e, child.id)}>Smazat argument</button>
+                    <button onClick={(e) => handleArgumentForm(e, child.id, child.type, child.text)}>Upravit</button>
                   </article>
                   {replyArgId === child.id && (
                     <div className="reply-form" onClick={(e) => e.stopPropagation()}>
@@ -133,6 +195,14 @@ const DebateDetail = () => {
                       <input type="text" placeholder='PRO/CON' onChange={(e) => setReplyData({ ...replyData, type: e.target.value })} value={replyData.type}/>
                       <button onClick={() => handleSubmit(child.id)}>Send</button>
                       <button onClick={() => setReplyArgId(null)}>Zrušit</button>
+                    </div>
+                  )}
+                  {updateArgId === child.id && (
+                    <div className="update-form" onClick={(e) => e.stopPropagation()}>
+                      <input type="text" placeholder="Text" onChange={(e) => setUpdateData({ ...updateData, text: e.target.value })} value={updateData.text}/>
+                      <input type="text" placeholder='PRO/CON' onChange={(e) => setUpdateData({ ...updateData, type: e.target.value })} value={updateData.type}/>
+                      <button onClick={() => handleUpdateSubmit(child.id)}>Send</button>
+                      <button onClick={() => setUpdateArgId(null)}>Zrušit</button>
                     </div>
                   )}
                 </div>

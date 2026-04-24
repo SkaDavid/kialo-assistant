@@ -84,25 +84,32 @@ public class ArgumentService {
         Argument argument = argumentOpt.get();
         User user = userOpt.get();
 
-        if(!argument.getOwner().getId().equals(user.getId())){
+        if(!argument.getOwner().getKeycloakId().equals(user.getKeycloakId())){
             throw new UnauthorizedAccessException("User is not the owner of the argument");
         }
         argumentRepository.deleteById(argumentId);
     }
 
     @Transactional
-    public ArgumentResponseDto updateArgument(Long id, String newText, String keycloakId)
-            throws ArgumentNotFoundException, UnauthorizedAccessException {
+    public ArgumentResponseDto updateArgument(Long id, String newText, ArgumentType newType, String keycloakId)
+            throws ArgumentNotFoundException, UnauthorizedAccessException, UserNotFoundException {
 
         Optional<Argument> argumentOpt = argumentRepository.findById(id);
+        Optional<User> userOpt = userRepository.findByKeycloakId(keycloakId);
         if(argumentOpt.isEmpty()){
             throw new ArgumentNotFoundException("Argument not found");
         }
+        if(userOpt.isEmpty()){
+            throw new UserNotFoundException("User not found");
+        }
+        User user = userOpt.get();
         Argument argument = argumentOpt.get();
-        if (!argument.getOwner().getKeycloakId().equals(keycloakId)) {
+        if (!argument.getOwner().getKeycloakId().equals(user.getKeycloakId())) {
             throw new UnauthorizedAccessException("You are not the owner of this argument");
         }
         argument.setText(newText);
+        argument.setType(newType);
+        argumentRepository.save(argument);
         return mapper.toDto(argument);
     }
 }

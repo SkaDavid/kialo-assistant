@@ -34,10 +34,10 @@ public class ArgumentController {
 
     @PutMapping("/{id}")
     public ResponseEntity<ArgumentResponseDto> updateArgument(@PathVariable Long id, @RequestBody UpdateArgumentDto dto, JwtAuthenticationToken token)
-            throws ArgumentNotFoundException, UnauthorizedAccessException {
+            throws ArgumentNotFoundException, UnauthorizedAccessException, UserNotFoundException {
 
         String keycloakId = token.getToken().getSubject();
-        ArgumentResponseDto argument = argumentService.updateArgument(id, dto.getText(), keycloakId);
+        ArgumentResponseDto argument = argumentService.updateArgument(id, dto.getText(), dto.getType(), keycloakId);
         return ResponseEntity.ok(argument);
     }
 
