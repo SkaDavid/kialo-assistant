@@ -9,12 +9,16 @@ const CreateDebate = () => {
   const [topic, setTopic] = useState("");
   const [thesis, setThesis] = useState("");
 
+  const [data, setData] = useState({topic: "", thesis: "", isPrivate: false})
+
   const handleFormSubmit = async (e) => {
     e.preventDefault();
 
+    const visibilityData = data.isPrivate ? "PRIVATE" : "PUBLIC";
     const dto = {
-      topic: topic,
-      thesis: thesis
+      topic: data.topic,
+      thesis: data.thesis,
+      visibility: visibilityData
     }
 
     const json_dto = JSON.stringify(dto);
@@ -43,8 +47,10 @@ const CreateDebate = () => {
     <div className="create-debate-container">
       <h1>Create debate</h1>
       <form onSubmit={handleFormSubmit}>
-        <input type="text" value={topic} onChange={(e) => setTopic(e.target.value)} placeholder='Topic'/>
-        <input type="text" value={thesis} onChange={(e) => setThesis(e.target.value)} placeholder='Thesis'/>
+        <input type="text" value={data.topic} onChange={(e) => setData({...data, topic: e.target.value})} placeholder='Topic'/>
+        <input type="text" value={data.thesis} onChange={(e) => setData({...data, thesis: e.target.value})} placeholder='Thesis'/>
+        <label htmlFor="private"> private </label>
+        <input type="checkbox" name="private" checked={data.isPrivate} onChange={(e) => setData({...data, isPrivate: e.target.checked})}/>
         <input type="submit"/>
       </form>
     </div>

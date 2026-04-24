@@ -59,7 +59,7 @@ const Index = () => {
   const handleUpdateForm = (e, debateId) => {
     e.stopPropagation();
     setDebateUpdateId(debateId);
-    etUpdateDebateData({ topic: debate.title });
+    setUpdateDebateData({ topic: debate.title });
   }
 
   return (
@@ -71,6 +71,7 @@ const Index = () => {
             <h3>{debate.title}</h3>
             <p>{debate.arguments[0]?.text}</p>
             <p>{debate.owner.username}</p>
+            <p><strong>{debate.visibility}</strong></p>
             <button onClick={(e) => handleUpdateForm(e, debate.id)}>Upravit</button>
             {
               updateDebateId === debate.id && 

@@ -27,8 +27,9 @@ public class Mapper {
     public DebateResponseDto toDto(Debate debate){
         DebateResponseDto response = new DebateResponseDto();
         response.setId(debate.getId());
-        response.setTitle(debate.getTitle());
+        response.setTitle(debate.getTopic());
         response.setOwner(this.toDto(debate.getOwner()));
+        response.setVisibility(debate.getVisibility());
         response.setArguments(debate.getArguments().stream()
                 .map((argument) -> this.toDto(argument))
                 .collect(Collectors.toList())

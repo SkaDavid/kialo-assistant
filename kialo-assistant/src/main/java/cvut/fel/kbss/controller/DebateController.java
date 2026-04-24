@@ -34,14 +34,16 @@ public class DebateController {
         DebateResponseDto response = this.debateService.createDebate(
                 dto.getTopic(),
                 dto.getThesis(),
+                dto.getVisibility(),
                 keycloakId
         );
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @GetMapping
-    public ResponseEntity<List<DebateResponseDto>> getDebates(){
-        List<DebateResponseDto> debates = debateService.findAll();
+    public ResponseEntity<List<DebateResponseDto>> getDebates(JwtAuthenticationToken token){
+        String keycloakId = token.getToken().getSubject();
+        List<DebateResponseDto> debates = debateService.findAllForUser(keycloakId);
         return ResponseEntity.status(HttpStatus.OK).body(debates);
     }
 
@@ -57,12 +59,9 @@ public class DebateController {
     public ResponseEntity<DebateResponseDto> updateDebate(@PathVariable Long id, @RequestBody UpdateDebateDto dto, JwtAuthenticationToken token)
             throws DebateNotFoundException, UnauthorizedAccessException  {
         String keycloakId = token.getToken().getSubject();
-        DebateResponseDto debate = debateService.updateDebate(id, dto.getTopic(), keycloakId);
+        DebateResponseDto debate = debateService.updateDebate(id, dto.getTopic(), dto.getVisibility(), keycloakId);
         return ResponseEntity.ok(debate);
     }
-
-
-
 
 
 

@@ -26,4 +26,8 @@ public class Debate {
     @OneToMany(mappedBy = "debate", cascade = CascadeType.ALL)
     private List<Argument> arguments;
 
+    @Column(name="visibility")
+    @Enumerated(EnumType.STRING)
+    private DebateVisibility visibility;
+
 }

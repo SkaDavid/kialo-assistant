@@ -3,10 +3,7 @@ package cvut.fel.kbss.service;
 import cvut.fel.kbss.dto.Mapper;
 import cvut.fel.kbss.dto.response.DebateResponseDto;
 import cvut.fel.kbss.exception.*;
-import cvut.fel.kbss.model.Argument;
-import cvut.fel.kbss.model.ArgumentType;
-import cvut.fel.kbss.model.Debate;
-import cvut.fel.kbss.model.User;
+import cvut.fel.kbss.model.*;
 import cvut.fel.kbss.repository.DebateRepository;
 import cvut.fel.kbss.repository.UserRepository;
 import org.json.JSONArray;
@@ -44,7 +41,7 @@ public class DebateService {
 
 
     @Transactional
-    public DebateResponseDto createDebate(String topic, String thesis, String keyCloakId) throws UserNotFoundException {
+    public DebateResponseDto createDebate(String topic, String thesis, DebateVisibility visibility, String keyCloakId) throws UserNotFoundException {
         Optional<User> ownerOpt = userRepository.findByKeycloakId(keyCloakId);
         if(ownerOpt.isEmpty()){
             throw new UserNotFoundException("User not found");
@@ -59,6 +56,7 @@ public class DebateService {
         debate.setOwner(owner);
         debate.setTopic(topic);
         debate.setArguments(newList);
+        debate.setVisibility(visibility);
 
         Debate newDebate = debateRepository.save(debate);
         return mapper.toDto(newDebate);
@@ -80,8 +78,15 @@ public class DebateService {
                 .collect(Collectors.toList());
     }
 
+    public List<DebateResponseDto> findAllForUser(String keycloakId) {
+        List<Debate> debates = debateRepository.findDebatesForUser(keycloakId);
+        return debates.stream()
+                .map(debate -> mapper.toDto(debate))
+                .collect(Collectors.toList());
+    }
+
     @Transactional
-    public DebateResponseDto updateDebate(Long id, String newTopic, String keycloakId)
+    public DebateResponseDto updateDebate(Long id, String newTopic, DebateVisibility visibility, String keycloakId)
             throws DebateNotFoundException, UnauthorizedAccessException {
 
         Optional<Debate> debateOpt = debateRepository.findById(id);
@@ -93,6 +98,7 @@ public class DebateService {
             throw new UnauthorizedAccessException("You are not the owner of this debate");
         }
         debate.setTopic(newTopic);
+        debate.setVisibility(visibility);
         debateRepository.save(debate);
         return mapper.toDto(debate);
     }

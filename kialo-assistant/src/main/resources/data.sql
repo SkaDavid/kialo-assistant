@@ -12,7 +12,9 @@ INSERT INTO app_users (id, username, keycloak_id) VALUES (2, 'Marie_Cerna', 2);
 INSERT INTO app_users (id, username, keycloak_id) VALUES (3, 'Petr_Svoboda', 3);
 
 -- 2. Jedna hlavní debata
-INSERT INTO debate (id, title, user_id) VALUES (1, 'Budoucnost AI v medicíně', 1);
+INSERT INTO debate (id, topic, user_id, visibility) VALUES (1, 'Budoucnost AI v medicíně', 1, 'PUBLIC');
+INSERT INTO debate (id, topic, user_id, visibility) VALUES (2, 'Budoucnost', 2, 'PRIVATE');
+INSERT INTO debate (id, topic, user_id, visibility) VALUES (3, 'Budoucnost AI ', 3, 'PUBLIC');
 
 -- 3. Argumenty (Seřazeny tak, aby parent existoval dříve než potomek)
 -- Úroveň 0: Teze
@@ -51,7 +53,7 @@ INSERT INTO argument (id, text, type, debate_id, user_id, parent_id) VALUES (13,
 
 -- Reset sekvencí
 ALTER TABLE app_users ALTER COLUMN id RESTART WITH 4;
-ALTER TABLE debate ALTER COLUMN id RESTART WITH 2;
+ALTER TABLE debate ALTER COLUMN id RESTART WITH 4;
 ALTER TABLE argument ALTER COLUMN id RESTART WITH 21;
 
 -- Opětovné zapnutí kontrol
