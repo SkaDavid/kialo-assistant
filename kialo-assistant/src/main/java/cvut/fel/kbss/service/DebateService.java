@@ -57,7 +57,7 @@ public class DebateService {
         newList.add(argument);
 
         debate.setOwner(owner);
-        debate.setTitle(topic);
+        debate.setTopic(topic);
         debate.setArguments(newList);
 
         Debate newDebate = debateRepository.save(debate);
@@ -81,7 +81,7 @@ public class DebateService {
     }
 
     @Transactional
-    public DebateResponseDto updateDebate(Long id, String newTitle, String keycloakId)
+    public DebateResponseDto updateDebate(Long id, String newTopic, String keycloakId)
             throws DebateNotFoundException, UnauthorizedAccessException {
 
         Optional<Debate> debateOpt = debateRepository.findById(id);
@@ -92,7 +92,8 @@ public class DebateService {
         if (!debate.getOwner().getKeycloakId().equals(keycloakId)) {
             throw new UnauthorizedAccessException("You are not the owner of this debate");
         }
-        debate.setTitle(newTitle);
+        debate.setTopic(newTopic);
+        debateRepository.save(debate);
         return mapper.toDto(debate);
     }
 

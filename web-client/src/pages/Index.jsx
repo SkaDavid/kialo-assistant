@@ -7,9 +7,10 @@ const Index = () => {
   const navigate = useNavigate();
 
   const [debates, setDebates] = useState(null);
+  const [updateDebateId, setDebateUpdateId] = useState(null);
+  const [updateDebateData, setUpdateDebateData] = useState({topic: "1"});
 
 
-  useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await fetch("http://localhost:8082/debate", {
@@ -26,9 +27,40 @@ const Index = () => {
       }
     };
 
+  useEffect(() => {
     fetchData();
   }, []);
   if (!debates) return <p>Načítání</p>;
+
+  const handleUpdateFormSend = async (e, debateId) => {
+    e.stopPropagation();
+    const dto = {
+      topic: updateDebateData.topic
+    }
+    
+    try {
+      const response = await fetch(`http://localhost:8082/debate/${debateId}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${keycloak.token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(dto)
+      });
+      if(response.ok){
+        setDebateUpdateId(null);
+        fetchData();
+      }
+    } catch (error) {
+      console.error("Chyba při hledani:", error);
+    }
+  }
+
+  const handleUpdateForm = (e, debateId) => {
+    e.stopPropagation();
+    setDebateUpdateId(debateId);
+    etUpdateDebateData({ topic: debate.title });
+  }
 
   return (
     <div className="debate-container">      
@@ -39,6 +71,14 @@ const Index = () => {
             <h3>{debate.title}</h3>
             <p>{debate.arguments[0]?.text}</p>
             <p>{debate.owner.username}</p>
+            <button onClick={(e) => handleUpdateForm(e, debate.id)}>Upravit</button>
+            {
+              updateDebateId === debate.id && 
+              <div className="debateForm">
+                <input type="text" value={updateDebateData.topic} onChange={(e) => setUpdateDebateData({...updateDebateData, topic: e.target.value})} />
+                <button onClick={(e) => handleUpdateFormSend(e, debate.id)}>Upravit</button>
+              </div>
+            }
           </li>
         ))}
       </ul>
