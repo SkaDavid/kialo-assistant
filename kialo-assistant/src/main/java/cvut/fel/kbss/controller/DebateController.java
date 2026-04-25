@@ -8,6 +8,7 @@ import cvut.fel.kbss.dto.response.DebateResponseDto;
 import cvut.fel.kbss.exception.*;
 import cvut.fel.kbss.model.Debate;
 import cvut.fel.kbss.service.DebateService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.graphql.GraphQlProperties;
 import org.springframework.http.HttpStatus;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Slf4j
 @CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("debate")
@@ -31,6 +33,8 @@ public class DebateController {
     public ResponseEntity<DebateResponseDto> createDebate(@RequestBody NewDebateDto dto, JwtAuthenticationToken token)
             throws UserNotFoundException {
         String keycloakId = token.getToken().getSubject();
+        log.info("User {} is creating debate with {} topic", keycloakId, dto.getTopic());
+
         DebateResponseDto response = this.debateService.createDebate(
                 dto.getTopic(),
                 dto.getThesis(),
@@ -43,13 +47,17 @@ public class DebateController {
     @GetMapping
     public ResponseEntity<List<DebateResponseDto>> getDebates(JwtAuthenticationToken token){
         String keycloakId = token.getToken().getSubject();
+        log.info("User {} is requesting list of debates", keycloakId);
+
         List<DebateResponseDto> debates = debateService.findAllForUser(keycloakId);
         return ResponseEntity.status(HttpStatus.OK).body(debates);
     }
 
+    // TODO zabezpecit
     @GetMapping("/{id}")
     public ResponseEntity<DebateResponseDto> getDebate(@PathVariable Long id)
             throws DebateNotFoundException {
+
         DebateResponseDto debate = debateService.getDebate(id);
         return ResponseEntity.status(HttpStatus.OK).body(debate);
     }
@@ -59,6 +67,8 @@ public class DebateController {
     public ResponseEntity<DebateResponseDto> updateDebate(@PathVariable Long id, @RequestBody UpdateDebateDto dto, JwtAuthenticationToken token)
             throws DebateNotFoundException, UnauthorizedAccessException  {
         String keycloakId = token.getToken().getSubject();
+        log.info("User {} is updating debate {}", keycloakId, id);
+
         DebateResponseDto debate = debateService.updateDebate(id, dto.getTopic(), dto.getVisibility(), keycloakId);
         return ResponseEntity.ok(debate);
     }
