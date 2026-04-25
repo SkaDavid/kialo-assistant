@@ -173,6 +173,15 @@ const DebateDetail = () => {
         <article className="THESIS" onClick={() => handleArgumentClick(thesis)}>
           <p>{thesis.text}</p>
           <p>{thesis.owner.username}</p>
+          <button onClick={(e) => handleOpenForm(e, thesis.id)}>Reagovat</button>
+          {replyArgId === thesis.id && (
+            <div className="reply-form" onClick={(e) => e.stopPropagation()}>
+              <input type="text" placeholder="Text" onChange={(e) => setReplyData({ ...replyData, text: e.target.value })} value={replyData.text}/>
+              <input type="text" placeholder='PRO/CON' onChange={(e) => setReplyData({ ...replyData, type: e.target.value })} value={replyData.type}/>
+              <button onClick={() => handleSubmit(thesis.id)}>Send</button>
+              <button onClick={() => setReplyArgId(null)}>Zrušit</button>
+            </div>
+            )}
         </article>
       {activePath.map((parentId, index) => {
           const children = debate.arguments.filter(arg => arg.parent === parentId);
