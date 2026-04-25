@@ -55,10 +55,12 @@ public class DebateController {
 
     // TODO zabezpecit
     @GetMapping("/{id}")
-    public ResponseEntity<DebateResponseDto> getDebate(@PathVariable Long id)
-            throws DebateNotFoundException {
+    public ResponseEntity<DebateResponseDto> getDebate(@PathVariable Long id, JwtAuthenticationToken token)
+            throws DebateNotFoundException, UnauthorizedAccessException {
+        String keycloakId = token.getToken().getSubject();
+        log.info("User {} is requesting debate {}", keycloakId, id);
 
-        DebateResponseDto debate = debateService.getDebate(id);
+        DebateResponseDto debate = debateService.getDebate(id, keycloakId);
         return ResponseEntity.status(HttpStatus.OK).body(debate);
     }
 

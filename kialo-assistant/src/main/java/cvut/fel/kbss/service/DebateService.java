@@ -63,12 +63,20 @@ public class DebateService {
     }
 
     @Transactional
-    public DebateResponseDto getDebate(Long id) throws DebateNotFoundException {
-        Optional<Debate> debate = debateRepository.findById(id);
-        if(debate.isEmpty()){
+    public DebateResponseDto getDebate(Long id, String keyCloakId) throws DebateNotFoundException, UnauthorizedAccessException {
+        Optional<Debate> debateOpt = debateRepository.findById(id);
+        if(debateOpt.isEmpty()){
             throw new DebateNotFoundException("Debate not found");
         }
-        return mapper.toDto(debate.get());
+        Debate debate = debateOpt.get();
+
+        boolean isPublic = debate.getVisibility().equals(DebateVisibility.PUBLIC);
+        boolean isUserDebate = debate.getOwner().getKeycloakId().equals(keyCloakId);
+        if(isPublic || isUserDebate){
+            return mapper.toDto(debate);
+        } else{
+            throw new UnauthorizedAccessException("Not authorised to access this debate");
+        }
     }
 
     public List<DebateResponseDto> findAll() {
