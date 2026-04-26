@@ -62,6 +62,12 @@ const Index = () => {
     setUpdateDebateData({ topic: debate.title });
   }
 
+  const handleLogout = () => {
+    keycloak.logout({
+      redirectUri: window.location.origin 
+    });
+  };
+
   return (
     <div className="debate-container">      
       <h1>Seznam debat</h1>
@@ -85,6 +91,7 @@ const Index = () => {
           </li>
         ))}
       </ul>
+      <button onClick={handleLogout}>Logout</button>
     </div>
   );
 };
