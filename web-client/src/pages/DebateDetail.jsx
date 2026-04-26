@@ -15,6 +15,8 @@ const DebateDetail = () => {
   const [updateArgId, setUpdateArgId] = useState(null);
   const [updateData, setUpdateData] = useState({text: "", type: "PRO"});
 
+  const [argumentFallacy, setArgumentFallacy] = useState({text: "", label: "", score: null});
+
 
   const navigate = useNavigate();
 
@@ -164,6 +166,33 @@ const DebateDetail = () => {
     }
   }
 
+    const handleFallacyTest = async (argumentText) => {
+    const dto = {
+      text: argumentText
+    };
+    try {
+      const response = await fetch(`http://localhost:8082/argument/fallacy`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${keycloak.token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(dto)
+      });
+      if(response.ok){
+        const data = await response.json();
+        setArgumentFallacy({
+          text: argumentText,
+          label: data.fallacy,
+          score: data.confidence
+        });
+        console.log(data);
+      }
+    } catch (error) {
+      console.error("Chyba při hledani:", error);
+    }
+  }
+
   
 
   return (
@@ -194,6 +223,7 @@ const DebateDetail = () => {
                     <p>{child.text}</p>
                     <p>{child.owner.username}</p>
                     <button onClick={(e) => handleOpenForm(e, child.id)}>Reagovat</button>
+                    <button onClick={() => handleFallacyTest(child.text)}>Check for fallacy</button>
                     {
                       keycloak.tokenParsed?.preferred_username === child.owner.username && (
                         <div>
@@ -226,6 +256,15 @@ const DebateDetail = () => {
         })
       }
       </div>
+      {argumentFallacy.text !== "" &&
+        <div className='THESIS'>
+          <h2>Argument fallacy test</h2>
+          <p>Text: {argumentFallacy.text}</p>
+          <p>Label: {argumentFallacy.label}</p>
+          <p>Score: {argumentFallacy.score}</p>
+        </div>
+      }
+      
       <button onClick={() => navigate('/')}>Zpět</button>
     </div>
   );
