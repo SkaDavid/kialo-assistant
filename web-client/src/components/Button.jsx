@@ -2,7 +2,7 @@ function Button({ text, count, setCount }) {
 
 
   async function handleClick() {
-  const url = "http://localhost:8082/debate/Banany%20hodne%20smrdi";
+  const url = "http://localhost:8082/debate/";
   try {
     const response = await fetch(url);
     if (!response.ok) {

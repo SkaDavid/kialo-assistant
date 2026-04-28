@@ -216,10 +216,10 @@ const DebateDetail = () => {
           const children = debate.arguments.filter(arg => arg.parent === parentId);
           if (children.length === 0) return null;
           return (
-            <div key={parentId} className='argContainer'>
+            <div key={parentId} className="argContainer">
               {children.map((child) => (
-                <div key={child.id} className="argument-wrapper">
-                  <article className={child.type} onClick={() => handleArgumentClick(child)}>
+                <div key={child.id} className={activePath.includes(child.id) ? "active argument-wrapper": "argument-wrapper" } >
+                  <article className={child.type} className={child.type} onClick={() => handleArgumentClick(child)}>
                     <p>{child.text}</p>
                     <p>{child.owner.username}</p>
                     <button onClick={(e) => handleOpenForm(e, child.id)}>Reagovat</button>
@@ -236,7 +236,17 @@ const DebateDetail = () => {
                   {replyArgId === child.id && (
                     <div className="reply-form" onClick={(e) => e.stopPropagation()}>
                       <input type="text" placeholder="Text" onChange={(e) => setReplyData({ ...replyData, text: e.target.value })} value={replyData.text}/>
-                      <input type="text" placeholder='PRO/CON' onChange={(e) => setReplyData({ ...replyData, type: e.target.value })} value={replyData.type}/>
+                      <div>
+                        <label>
+                          <input type="radio" name="argType" value="PRO" checked={replyData.type === "PRO"} onChange={(e) => {setReplyData({ ...replyData, type: e.target.value })}} ></input>
+                          Pro
+                        </label>
+
+                        <label>
+                          <input type="radio" name="argType" value="CON" checked={replyData.type === "CON"} onChange={(e) => {setReplyData({ ...replyData, type: e.target.value })}}></input>
+                          Proti
+                        </label>
+                      </div>
                       <button onClick={() => handleSubmit(child.id)}>Send</button>
                       <button onClick={() => setReplyArgId(null)}>Zrušit</button>
                     </div>
@@ -244,7 +254,17 @@ const DebateDetail = () => {
                   {updateArgId === child.id && (
                     <div className="update-form" onClick={(e) => e.stopPropagation()}>
                       <input type="text" placeholder="Text" onChange={(e) => setUpdateData({ ...updateData, text: e.target.value })} value={updateData.text}/>
-                      <input type="text" placeholder='PRO/CON' onChange={(e) => setUpdateData({ ...updateData, type: e.target.value })} value={updateData.type}/>
+                      <div>
+                        <label>
+                          <input type="radio" name="argType" value="PRO" checked={updateData.type === "PRO"} onChange={(e) => {setUpdateData({ ...updateData, type: e.target.value })}} ></input>
+                          Pro
+                        </label>
+
+                        <label>
+                          <input type="radio" name="argType" value="CON" checked={updateData.type === "CON"} onChange={(e) => {setUpdateData({ ...updateData, type: e.target.value })}}></input>
+                          Proti
+                        </label>
+                      </div>
                       <button onClick={() => handleUpdateSubmit(child.id)}>Send</button>
                       <button onClick={() => setUpdateArgId(null)}>Zrušit</button>
                     </div>
