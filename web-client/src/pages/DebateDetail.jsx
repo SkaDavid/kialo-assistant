@@ -186,7 +186,6 @@ const DebateDetail = () => {
           label: data.fallacy,
           score: data.confidence
         });
-        console.log(data);
       }
     } catch (error) {
       console.error("Chyba při hledani:", error);
