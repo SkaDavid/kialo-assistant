@@ -15,6 +15,8 @@ const DebateDetail = () => {
   const [updateArgId, setUpdateArgId] = useState(null);
   const [updateData, setUpdateData] = useState({text: "", type: "PRO"});
 
+  const [argumentFallacy, setArgumentFallacy] = useState({text: "", label: "", score: null});
+
 
   const navigate = useNavigate();
 
@@ -164,6 +166,33 @@ const DebateDetail = () => {
     }
   }
 
+    const handleFallacyTest = async (argumentText) => {
+    const dto = {
+      text: argumentText
+    };
+    try {
+      const response = await fetch(`http://localhost:8082/argument/fallacy`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${keycloak.token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(dto)
+      });
+      if(response.ok){
+        const data = await response.json();
+        setArgumentFallacy({
+          text: argumentText,
+          label: data.fallacy,
+          score: data.confidence
+        });
+        console.log(data);
+      }
+    } catch (error) {
+      console.error("Chyba při hledani:", error);
+    }
+  }
+
   
 
   return (
@@ -187,13 +216,14 @@ const DebateDetail = () => {
           const children = debate.arguments.filter(arg => arg.parent === parentId);
           if (children.length === 0) return null;
           return (
-            <div key={parentId} className='argContainer'>
+            <div key={parentId} className="argContainer">
               {children.map((child) => (
-                <div key={child.id} className="argument-wrapper">
-                  <article className={child.type} onClick={() => handleArgumentClick(child)}>
+                <div key={child.id} className={activePath.includes(child.id) ? "active argument-wrapper": "argument-wrapper" } >
+                  <article className={child.type} className={child.type} onClick={() => handleArgumentClick(child)}>
                     <p>{child.text}</p>
                     <p>{child.owner.username}</p>
                     <button onClick={(e) => handleOpenForm(e, child.id)}>Reagovat</button>
+                    <button onClick={() => handleFallacyTest(child.text)}>Check for fallacy</button>
                     {
                       keycloak.tokenParsed?.preferred_username === child.owner.username && (
                         <div>
@@ -206,7 +236,17 @@ const DebateDetail = () => {
                   {replyArgId === child.id && (
                     <div className="reply-form" onClick={(e) => e.stopPropagation()}>
                       <input type="text" placeholder="Text" onChange={(e) => setReplyData({ ...replyData, text: e.target.value })} value={replyData.text}/>
-                      <input type="text" placeholder='PRO/CON' onChange={(e) => setReplyData({ ...replyData, type: e.target.value })} value={replyData.type}/>
+                      <div>
+                        <label>
+                          <input type="radio" name="argType" value="PRO" checked={replyData.type === "PRO"} onChange={(e) => {setReplyData({ ...replyData, type: e.target.value })}} ></input>
+                          Pro
+                        </label>
+
+                        <label>
+                          <input type="radio" name="argType" value="CON" checked={replyData.type === "CON"} onChange={(e) => {setReplyData({ ...replyData, type: e.target.value })}}></input>
+                          Proti
+                        </label>
+                      </div>
                       <button onClick={() => handleSubmit(child.id)}>Send</button>
                       <button onClick={() => setReplyArgId(null)}>Zrušit</button>
                     </div>
@@ -214,7 +254,17 @@ const DebateDetail = () => {
                   {updateArgId === child.id && (
                     <div className="update-form" onClick={(e) => e.stopPropagation()}>
                       <input type="text" placeholder="Text" onChange={(e) => setUpdateData({ ...updateData, text: e.target.value })} value={updateData.text}/>
-                      <input type="text" placeholder='PRO/CON' onChange={(e) => setUpdateData({ ...updateData, type: e.target.value })} value={updateData.type}/>
+                      <div>
+                        <label>
+                          <input type="radio" name="argType" value="PRO" checked={updateData.type === "PRO"} onChange={(e) => {setUpdateData({ ...updateData, type: e.target.value })}} ></input>
+                          Pro
+                        </label>
+
+                        <label>
+                          <input type="radio" name="argType" value="CON" checked={updateData.type === "CON"} onChange={(e) => {setUpdateData({ ...updateData, type: e.target.value })}}></input>
+                          Proti
+                        </label>
+                      </div>
                       <button onClick={() => handleUpdateSubmit(child.id)}>Send</button>
                       <button onClick={() => setUpdateArgId(null)}>Zrušit</button>
                     </div>
@@ -226,6 +276,15 @@ const DebateDetail = () => {
         })
       }
       </div>
+      {argumentFallacy.text !== "" &&
+        <div className='THESIS'>
+          <h2>Argument fallacy test</h2>
+          <p>Text: {argumentFallacy.text}</p>
+          <p>Label: {argumentFallacy.label}</p>
+          <p>Score: {argumentFallacy.score}</p>
+        </div>
+      }
+      
       <button onClick={() => navigate('/')}>Zpět</button>
     </div>
   );

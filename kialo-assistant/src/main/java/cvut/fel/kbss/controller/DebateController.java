@@ -1,22 +1,19 @@
 package cvut.fel.kbss.controller;
 
-import cvut.fel.kbss.dto.Mapper;
 import cvut.fel.kbss.dto.request.NewDebateDto;
 import cvut.fel.kbss.dto.request.UpdateDebateDto;
-import cvut.fel.kbss.dto.response.ArgumentResponseDto;
 import cvut.fel.kbss.dto.response.DebateResponseDto;
 import cvut.fel.kbss.exception.*;
-import cvut.fel.kbss.model.Debate;
 import cvut.fel.kbss.service.DebateService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.graphql.GraphQlProperties;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @CrossOrigin(origins = "*")
@@ -53,7 +50,6 @@ public class DebateController {
         return ResponseEntity.status(HttpStatus.OK).body(debates);
     }
 
-    // TODO zabezpecit
     @GetMapping("/{id}")
     public ResponseEntity<DebateResponseDto> getDebate(@PathVariable Long id, JwtAuthenticationToken token)
             throws DebateNotFoundException, UnauthorizedAccessException {

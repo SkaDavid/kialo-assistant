@@ -1,13 +1,16 @@
 package cvut.fel.kbss.controller;
 
+import cvut.fel.kbss.dto.request.FallacyRequestDto;
 import cvut.fel.kbss.dto.request.NewArgumentDto;
 import cvut.fel.kbss.dto.request.UpdateArgumentDto;
 import cvut.fel.kbss.dto.response.ArgumentResponseDto;
+import cvut.fel.kbss.dto.response.FallacyResponseDto;
 import cvut.fel.kbss.exception.ArgumentNotFoundException;
 import cvut.fel.kbss.exception.DebateNotFoundException;
 import cvut.fel.kbss.exception.UnauthorizedAccessException;
 import cvut.fel.kbss.exception.UserNotFoundException;
 import cvut.fel.kbss.service.ArgumentService;
+import cvut.fel.kbss.service.FallacyService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,9 +24,11 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("argument")
 public class ArgumentController {
     private final ArgumentService argumentService;
+    private final FallacyService fallacyService;
     @Autowired
-    public ArgumentController(ArgumentService argumentService){
+    public ArgumentController(ArgumentService argumentService, FallacyService fallacyService){
         this.argumentService = argumentService;
+        this.fallacyService = fallacyService;
     }
 
     @PostMapping
@@ -54,5 +59,12 @@ public class ArgumentController {
 
         this.argumentService.deleteArgument(id, keycloakId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    @PostMapping("/fallacy")
+    public ResponseEntity<FallacyResponseDto> createArgument(@RequestBody FallacyRequestDto dto) {
+        FallacyResponseDto fallacyResponse = fallacyService.testFallacy(dto.getText());
+
+        return ResponseEntity.status(HttpStatus.OK).body(fallacyResponse);
     }
 }

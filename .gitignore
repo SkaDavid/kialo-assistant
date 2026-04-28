@@ -1,3 +1,6 @@
 .htpasswd
 .env
 fallacy-detector
+checkpoint-1344
+docker-compose.yml
+
