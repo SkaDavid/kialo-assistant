@@ -1,3 +1,4 @@
 .htpasswd
 .env
 checkpoint-1344
+docker-compose.yml
