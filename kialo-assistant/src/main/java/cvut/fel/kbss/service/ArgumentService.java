@@ -1,12 +1,14 @@
 package cvut.fel.kbss.service;
 
 
+import cvut.fel.kbss.client.AIClient;
+import cvut.fel.kbss.client.FallacyClient;
 import cvut.fel.kbss.dto.Mapper;
+import cvut.fel.kbss.dto.response.AIArgumentResponseDto;
 import cvut.fel.kbss.dto.response.ArgumentResponseDto;
-import cvut.fel.kbss.exception.ArgumentNotFoundException;
-import cvut.fel.kbss.exception.DebateNotFoundException;
-import cvut.fel.kbss.exception.UnauthorizedAccessException;
-import cvut.fel.kbss.exception.UserNotFoundException;
+import cvut.fel.kbss.dto.response.DebateResponseDto;
+import cvut.fel.kbss.dto.response.FallacyResponseDto;
+import cvut.fel.kbss.exception.*;
 import cvut.fel.kbss.model.Argument;
 import cvut.fel.kbss.model.ArgumentType;
 import cvut.fel.kbss.model.Debate;
@@ -14,7 +16,8 @@ import cvut.fel.kbss.model.User;
 import cvut.fel.kbss.repository.ArgumentRepository;
 import cvut.fel.kbss.repository.DebateRepository;
 import cvut.fel.kbss.repository.UserRepository;
-import jakarta.persistence.EntityNotFoundException;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,14 +30,18 @@ public class ArgumentService {
     private final ArgumentRepository argumentRepository;
     private final UserRepository userRepository;
     private final DebateRepository debateRepository;
+    private final FallacyClient fallacyClient;
     private final Mapper mapper;
+    private final AIClient aiClient;
 
     @Autowired
-    public ArgumentService(ArgumentRepository argumentRepository, UserRepository userRepository, DebateRepository debateRepository, Mapper mapper){
+    public ArgumentService(ArgumentRepository argumentRepository, UserRepository userRepository, DebateRepository debateRepository, FallacyClient fallacyClient, Mapper mapper, AIClient aiClient){
         this.argumentRepository = argumentRepository;
         this.userRepository = userRepository;
         this.debateRepository = debateRepository;
+        this.fallacyClient = fallacyClient;
         this.mapper = mapper;
+        this.aiClient = aiClient;
     }
 
     @Transactional
@@ -111,5 +118,33 @@ public class ArgumentService {
         argument.setType(newType);
         argumentRepository.save(argument);
         return mapper.toDto(argument);
+    }
+
+    public FallacyResponseDto testFallacy(String text) throws ServiceNotRespondingException {
+        return fallacyClient.testFallacy(text);
+    }
+
+    public AIArgumentResponseDto generateArgument(String text, String type, List<ArgumentResponseDto> debate) throws APIkeyNotFoundException, ServiceNotRespondingException {
+        String debateString = formatDebateToJson(debate);
+        String newArgumentText = aiClient.generateArgument(text, type, debateString);
+
+        AIArgumentResponseDto result = new AIArgumentResponseDto();
+        result.setText(newArgumentText);
+        return result;
+    }
+
+    public String formatDebateToJson(List<ArgumentResponseDto> contextArguments) {
+        JSONArray jsonArray = new JSONArray();
+
+        for (ArgumentResponseDto arg : contextArguments) {
+            JSONObject obj = new JSONObject();
+            obj.put("id", arg.getId());
+            obj.put("parent", arg.getParent());
+            obj.put("type", arg.getType());
+            obj.put("text", arg.getText());
+
+            jsonArray.put(obj);
+        }
+        return jsonArray.toString(4);
     }
 }

@@ -10,22 +10,21 @@ const Index = () => {
   const [updateDebateId, setDebateUpdateId] = useState(null);
   const [updateDebateData, setUpdateDebateData] = useState({topic: "1"});
 
-
-    const fetchData = async () => {
-      try {
-        const response = await fetch("http://localhost:8082/debate", {
-            method: 'GET',
-            headers: {
-            'Authorization': `Bearer ${keycloak.token}`,
-            'Content-Type': 'application/json'
-            }
-        });
-        const data = await response.json();
-        setDebates(data);
-      } catch (error) {
-        console.error("Chyba při načítání:", error);
-      }
-    };
+  const fetchData = async () => {
+    try {
+      const response = await fetch("http://localhost:8082/debate", {
+          method: 'GET',
+          headers: {
+          'Authorization': `Bearer ${keycloak.token}`,
+          'Content-Type': 'application/json'
+          }
+      });
+      const data = await response.json();
+      setDebates(data);
+    } catch (error) {
+      console.error("Chyba při načítání:", error);
+    }
+  };
 
   useEffect(() => {
     fetchData();
@@ -62,6 +61,12 @@ const Index = () => {
     setUpdateDebateData({ topic: debate.title });
   }
 
+  const handleLogout = () => {
+    keycloak.logout({
+      redirectUri: window.location.origin 
+    });
+  };
+
   return (
     <div className="debate-container">      
       <h1>Seznam debat</h1>
@@ -85,6 +90,7 @@ const Index = () => {
           </li>
         ))}
       </ul>
+      <button onClick={handleLogout}>Logout</button>
     </div>
   );
 };

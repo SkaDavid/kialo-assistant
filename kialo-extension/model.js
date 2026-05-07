@@ -2,7 +2,7 @@ class Model {
     constructor(){
         this.proArgs = [];
         this.conArgs = [];
-        this. confirmedArgs = [];
+        this.confirmedArgs = [];
         this.name = "";
         this.thesis = "";
     }
@@ -10,7 +10,7 @@ class Model {
     resetDebate(){
         this.proArgs = [];
         this.conArgs = [];
-        this. confirmedArgs = [];
+        this.confirmedArgs = [];
         this.thesis = "";
     }
 
