@@ -1,6 +1,6 @@
 import AIArgument from './AIArgument';
 
-const AIDebatePreview = ({ debateData, fallacyData, onDelete, onFallacyCheck, onAddArgument, setReplyArgId, replyArgId, onGenerateArgument }) => {
+const AIDebatePreview = ({ debateData, fallacyData, onDelete, onFallacyCheck, onAddArgument, setReplyArgId, replyArgId, onGenerateArgument, onSubmitDebate }) => {
   if (!debateData) return null;
 
   return (
@@ -44,7 +44,7 @@ const AIDebatePreview = ({ debateData, fallacyData, onDelete, onFallacyCheck, on
       }
 
       <div className="preview-footer">
-        <button className="btn-save-all">Save full debate to database</button>
+        <button className="btn-save-all" onClick={onSubmitDebate}>Save full debate to database</button>
       </div>
     </div>
   );

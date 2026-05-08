@@ -126,6 +126,14 @@ const CreateDebate = () => {
     });
   }
 
+  const handleDebateSubmit = async () => {
+    const dto = {
+      topic: data.topic,
+      ...aiResponse
+    };
+    const reply = await api.importDebate(dto);
+  }
+
   return (
     <div className="create-debate-container">
       <h1>Create debate</h1>
@@ -149,6 +157,7 @@ const CreateDebate = () => {
             replyArgId={replyArgId} 
             setReplyArgId={setReplyArgId}
             onGenerateArgument={handleGenerateArgument}
+            onSubmitDebate={handleDebateSubmit}
           />
       )}
     </div>

@@ -81,4 +81,14 @@ public class DebateController {
         result = debateService.generateDebate(dto.getThesis());
         return ResponseEntity.ok(result);
     }
+
+    @PostMapping("/import-debate")
+    public ResponseEntity<DebateResponseDto> importDebate(@RequestBody AIDebateResponse dto, JwtAuthenticationToken token)
+            throws UserNotFoundException {
+        String keycloakId = token.getToken().getSubject();
+        log.info("User {} is importing AI generated debate: {}", keycloakId, dto.getTopic());
+
+        DebateResponseDto response = debateService.saveAiGeneratedDebate(dto, keycloakId);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
 }
