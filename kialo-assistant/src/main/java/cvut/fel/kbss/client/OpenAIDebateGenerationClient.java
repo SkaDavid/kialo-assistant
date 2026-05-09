@@ -17,7 +17,7 @@ import java.net.http.HttpResponse;
 import java.time.Duration;
 
 @Component
-public class OpenAIClient implements AIClient {
+public class OpenAIDebateGenerationClient implements DebateGenerationClient {
     @Value("${openai.key}")
     String secret_key;
     public AIDebateResponse generateDebate(String thesis) throws APIkeyNotFoundException, ServiceNotRespondingException {

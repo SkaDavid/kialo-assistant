@@ -1,13 +1,14 @@
 package cvut.fel.kbss.service;
 
 
-import cvut.fel.kbss.client.AIClient;
+import cvut.fel.kbss.client.DebateGenerationClient;
+import cvut.fel.kbss.client.ExplanationClient;
 import cvut.fel.kbss.client.FallacyClient;
 import cvut.fel.kbss.dto.Mapper;
 import cvut.fel.kbss.dto.response.AIArgumentResponseDto;
 import cvut.fel.kbss.dto.response.ArgumentResponseDto;
-import cvut.fel.kbss.dto.response.DebateResponseDto;
 import cvut.fel.kbss.dto.response.FallacyResponseDto;
+import cvut.fel.kbss.dto.response.ValidationResponse;
 import cvut.fel.kbss.exception.*;
 import cvut.fel.kbss.model.Argument;
 import cvut.fel.kbss.model.ArgumentType;
@@ -32,16 +33,18 @@ public class ArgumentService {
     private final DebateRepository debateRepository;
     private final FallacyClient fallacyClient;
     private final Mapper mapper;
-    private final AIClient aiClient;
+    private final DebateGenerationClient debateGenerationClient;
+    private final ExplanationClient explanationClient;
 
     @Autowired
-    public ArgumentService(ArgumentRepository argumentRepository, UserRepository userRepository, DebateRepository debateRepository, FallacyClient fallacyClient, Mapper mapper, AIClient aiClient){
+    public ArgumentService(ArgumentRepository argumentRepository, UserRepository userRepository, DebateRepository debateRepository, FallacyClient fallacyClient, Mapper mapper, DebateGenerationClient debateGenerationClient, ExplanationClient explanationClient){
         this.argumentRepository = argumentRepository;
         this.userRepository = userRepository;
         this.debateRepository = debateRepository;
         this.fallacyClient = fallacyClient;
         this.mapper = mapper;
-        this.aiClient = aiClient;
+        this.debateGenerationClient = debateGenerationClient;
+        this.explanationClient = explanationClient;
     }
 
     @Transactional
@@ -120,13 +123,22 @@ public class ArgumentService {
         return mapper.toDto(argument);
     }
 
-    public FallacyResponseDto testFallacy(String text) throws ServiceNotRespondingException {
-        return fallacyClient.testFallacy(text);
+    public FallacyResponseDto testFallacy(String text) throws ServiceNotRespondingException, APIkeyNotFoundException {
+        FallacyResponseDto fallacyTest = fallacyClient.testFallacy(text);
+        if(fallacyTest.getScore() > 0.75){
+            ValidationResponse validation = explanationClient.explainFallacy(fallacyTest.getLabel(), text);
+            fallacyTest.setFallacy(validation.isFallacy());
+            fallacyTest.setExplanation(validation.getExplanation());
+        } else {
+            fallacyTest.setExplanation("No fallacy detected");
+            fallacyTest.setFallacy(false);
+        }
+        return fallacyTest;
     }
 
     public AIArgumentResponseDto generateArgument(String text, String type, List<ArgumentResponseDto> debate) throws APIkeyNotFoundException, ServiceNotRespondingException {
         String debateString = formatDebateToJson(debate);
-        String newArgumentText = aiClient.generateArgument(text, type, debateString);
+        String newArgumentText = debateGenerationClient.generateArgument(text, type, debateString);
 
         AIArgumentResponseDto result = new AIArgumentResponseDto();
         result.setText(newArgumentText);

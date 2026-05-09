@@ -12,7 +12,7 @@ const DebateDetail = () => {
   const [activePath, setActivePath] = useState([]);
   const [replyArgId, setReplyArgId] = useState(null);
   const [updateArgId, setUpdateArgId] = useState(null);
-  const [argumentFallacy, setArgumentFallacy] = useState({ text: null, label: null, score: null })
+  const [argumentFallacy, setArgumentFallacy] = useState({ text: null, label: null, score: null, explanation: null })
 
   const fetchData = async () => {
     const data = await api.getArgument(id);
@@ -86,8 +86,9 @@ const DebateDetail = () => {
                       if(data){
                         setArgumentFallacy({
                           text: text,
-                          label: data.fallacy,
-                          score: data.confidence
+                          label: data.label,
+                          score: data.score,
+                          explanation: data.explanation
                         });
                       }
                     }
@@ -104,6 +105,9 @@ const DebateDetail = () => {
           <p>Text: {argumentFallacy.text}</p>
           <p>Label: {argumentFallacy.label}</p>
           <p>Score: {argumentFallacy.score}</p>
+          {argumentFallacy.explanation !== null &&
+            <p>Explanation: {argumentFallacy.explanation}</p>
+          }
         </div>
       }
       <button onClick={() => navigate('/')}>Back to main menu</button>

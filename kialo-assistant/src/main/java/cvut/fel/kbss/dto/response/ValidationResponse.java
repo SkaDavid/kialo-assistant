@@ -5,9 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class FallacyResponseDto {
-    private String label;
-    private float score;
-    private String explanation;
+public class ValidationResponse {
     private boolean isFallacy;
+    private String explanation;
 }

@@ -18,8 +18,8 @@ class TextRequest(BaseModel):
 async def analyze(request: TextRequest):
     result = pipe(request.text)[0]
     return {
-        "fallacy": result['label'],
-        "confidence": float(result['score'])
+        "label": result['label'],
+        "score": float(result['score'])
     }
 
 @app.get("/health")

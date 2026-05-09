@@ -1,6 +1,6 @@
 package cvut.fel.kbss.service;
 
-import cvut.fel.kbss.client.AIClient;
+import cvut.fel.kbss.client.DebateGenerationClient;
 import cvut.fel.kbss.dto.Mapper;
 import cvut.fel.kbss.dto.response.AIDebateResponse;
 import cvut.fel.kbss.dto.response.ArgumentResponseDto;
@@ -10,18 +10,10 @@ import cvut.fel.kbss.model.*;
 import cvut.fel.kbss.repository.ArgumentRepository;
 import cvut.fel.kbss.repository.DebateRepository;
 import cvut.fel.kbss.repository.UserRepository;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.time.Duration;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -31,15 +23,15 @@ public class DebateService {
     private final DebateRepository debateRepository;
     private final ArgumentRepository argumentRepository;
     private final Mapper mapper;
-    private final AIClient aiClient;
+    private final DebateGenerationClient debateGenerationClient;
 
     @Autowired
-    public DebateService(UserRepository userRepository, DebateRepository debateRepository, ArgumentRepository argumentRepository, Mapper mapper, AIClient aiClient){
+    public DebateService(UserRepository userRepository, DebateRepository debateRepository, ArgumentRepository argumentRepository, Mapper mapper, DebateGenerationClient debateGenerationClient){
         this.userRepository = userRepository;
         this.debateRepository = debateRepository;
         this.argumentRepository = argumentRepository;
         this.mapper = mapper;
-        this.aiClient = aiClient;
+        this.debateGenerationClient = debateGenerationClient;
     }
 
 
@@ -119,7 +111,7 @@ public class DebateService {
         if (thesis == null || thesis.isEmpty()) {
             throw new ThesisNotDefinedException("Thesis was not found");
         }
-        return this.aiClient.generateDebate(thesis);
+        return this.debateGenerationClient.generateDebate(thesis);
     }
 
     @Transactional
