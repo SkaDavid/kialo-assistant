@@ -4,6 +4,8 @@ const Argument = ({ arg, activePath, currentUser, currentAction, handlers }) => 
   const isReplyOpen = currentAction.replyArgId === arg.id; 
   const isUpdateOpen = currentAction.updateArgId === arg.id; 
 
+  const termitLink=`http://localhost:1234/termit/#/vocabularies/debate-${arg.debate}/document/${arg.debate}-${arg.id}.html?namespace=http://onto.fel.cvut.cz/ontologies/slovnik&fileNamespace=http://onto.fel.cvut.cz/ontologies/slovnik/debate-${arg.debate}/document/soubor/`
+
   return (
     <div className={activePath.includes(arg.id) ? "active argument-wrapper" : "argument-wrapper"}>
       <article className={arg.type} onClick={() => handlers.onArgumentClick(arg)}>
@@ -13,11 +15,11 @@ const Argument = ({ arg, activePath, currentUser, currentAction, handlers }) => 
         <div className="actions">
           <button onClick={(e) => handlers.onOpenReply(e, arg.id)}>React</button>
           <button onClick={(e) => handlers.onFallacyTest(e, arg.text)}>Check for fallacy</button>
-          
           {currentUser === arg.owner.username && (
             <>
               <button onClick={(e) => handlers.onDelete(e, arg.id)}>Delete</button>
               <button onClick={(e) => handlers.onOpenUpdate(e, arg.id)}>Change</button>
+              <a href={termitLink} target="_blank">Go to termit</a>
             </>
           )}
         </div>
