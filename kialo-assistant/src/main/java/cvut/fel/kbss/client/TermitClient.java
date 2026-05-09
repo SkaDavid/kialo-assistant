@@ -1,17 +1,12 @@
 package cvut.fel.kbss.client;
 
 import cvut.fel.kbss.exception.ServiceNotRespondingException;
-import org.json.JSONObject;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Component;
-
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
-import java.util.List;
-import java.util.Map;
 
 @Component
 public class TermitClient {
@@ -39,6 +34,100 @@ public class TermitClient {
 
         } catch (Exception e) {
             throw new ServiceNotRespondingException("Connection to Termit refused", e);
+        }
+    }
+
+    public void createArgumentFile(String argumentText, long debateId, long argumentId, String token) throws ServiceNotRespondingException {
+        String vocabIri = "http://onto.fel.cvut.cz/ontologies/slovnik/debate-" + debateId;
+        String localName = debateId + "-" + argumentId + ".html";
+        String fileNamespace = vocabIri + "/document/soubor/";
+
+        String metadataBody = createFileBody(vocabIri, localName);
+        String createUrl = "http://termit-server:8080/termit/rest/resources/document/files?namespace="
+                + java.net.URLEncoder.encode(vocabIri + "/", java.nio.charset.StandardCharsets.UTF_8);
+
+        try (HttpClient client = HttpClient.newHttpClient()) {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(createUrl))
+                    .header("Content-Type", "application/ld+json")
+                    .header("Authorization", "Bearer " + token)
+                    .POST(HttpRequest.BodyPublishers.ofString(metadataBody))
+                    .build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            System.out.println("Metadata Status: " + response.statusCode());
+
+            if (response.statusCode() == 201 || response.statusCode() == 200) {
+                String uploadUrl = "http://termit-server:8080/termit/rest/resources/" + localName + "/content?namespace="
+                        + java.net.URLEncoder.encode(fileNamespace, java.nio.charset.StandardCharsets.UTF_8);
+
+                String boundary = "JavaHttpClientBoundary" + System.currentTimeMillis();
+                String htmlContent = "<html><body>" + argumentText + "</body></html>";
+                
+                String multipartBody = "--" + boundary + "\r\n" +
+                        "Content-Disposition: form-data; name=\"file\"; filename=\"" + localName + "\"\r\n" +
+                        "Content-Type: text/html\r\n\r\n" +
+                        htmlContent + "\r\n" +
+                        "--" + boundary + "--\r\n";
+
+                HttpRequest uploadRequest = HttpRequest.newBuilder()
+                        .uri(URI.create(uploadUrl))
+                        .header("Content-Type", "multipart/form-data; boundary=" + boundary)
+                        .header("Authorization", "Bearer " + token)
+                        .PUT(HttpRequest.BodyPublishers.ofString(multipartBody))
+                        .build();
+
+                HttpResponse<String> uploadResponse = client.send(uploadRequest, HttpResponse.BodyHandlers.ofString());
+                System.out.println("Content Upload Status: " + uploadResponse.statusCode());
+            }
+        } catch (Exception e) {
+            throw new ServiceNotRespondingException("Chyba při nahrávání do Termitu", e);
+        }
+    }
+
+    private String createFileBody(String vocabIri, String localName) {
+        return """
+                {
+                    "iri": "%1$s/document/soubor/%2$s",
+                    "types": [
+                        "http://onto.fel.cvut.cz/ontologies/slovník/agendový/popis-dat/pojem/zdroj",
+                        "http://onto.fel.cvut.cz/ontologies/slovník/agendový/popis-dat/pojem/soubor"
+                    ],
+                    "label": "%2$s",
+                    "language": "en",
+                    "@context": {
+                        "label": "http://purl.org/dc/terms/title",
+                        "iri": "@id",
+                        "types": "@type"
+                    }
+                }
+                """.formatted(vocabIri, localName);
+    }
+
+    private int executePost(String url, String body, String contentType, String token) throws Exception {
+        try (HttpClient client = HttpClient.newHttpClient()) {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(url))
+                    .header("Content-Type", contentType)
+                    .header("Authorization", "Bearer " + token)
+                    .POST(HttpRequest.BodyPublishers.ofString(body))
+                    .build();
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            System.out.println("POST " + url + " | Status: " + response.statusCode());
+            return response.statusCode();
+        }
+    }
+
+    private void executePut(String url, String content, String contentType, String token) throws Exception {
+        try (HttpClient client = HttpClient.newHttpClient()) {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(url))
+                    .header("Content-Type", contentType)
+                    .header("Authorization", "Bearer " + token)
+                    .PUT(HttpRequest.BodyPublishers.ofString(content))
+                    .build();
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            System.out.println("PUT " + url + " | Status: " + response.statusCode());
         }
     }
 
@@ -120,10 +209,5 @@ public class TermitClient {
                      }
                  }
                   """.formatted(topic, debateId);
-    }
-
-
-    public void createArgumentFile(String argumentText, long debateId, long argumentId, String token) throws ServiceNotRespondingException {
-
     }
 }

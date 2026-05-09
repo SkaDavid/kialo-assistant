@@ -59,7 +59,7 @@ public class DebateService {
 
         Debate newDebate = debateRepository.save(debate);
         termitClient.createDictionary(topic, newDebate.getId(), token.getToken().getTokenValue());
-       // termitClient.createArgumentFile(thesis, debate.getId(), newDebate.getArguments().getFirst().getId(), token.getToken().getTokenValue());
+        termitClient.createArgumentFile(thesis, debate.getId(), newDebate.getArguments().getFirst().getId(), token.getToken().getTokenValue());
         return mapper.toDto(newDebate);
     }
 
