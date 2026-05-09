@@ -4,6 +4,7 @@ package cvut.fel.kbss.service;
 import cvut.fel.kbss.client.DebateGenerationClient;
 import cvut.fel.kbss.client.ExplanationClient;
 import cvut.fel.kbss.client.FallacyClient;
+import cvut.fel.kbss.client.TermitClient;
 import cvut.fel.kbss.dto.Mapper;
 import cvut.fel.kbss.dto.response.AIArgumentResponseDto;
 import cvut.fel.kbss.dto.response.ArgumentResponseDto;
@@ -20,6 +21,7 @@ import cvut.fel.kbss.repository.UserRepository;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,9 +37,10 @@ public class ArgumentService {
     private final Mapper mapper;
     private final DebateGenerationClient debateGenerationClient;
     private final ExplanationClient explanationClient;
+    private final TermitClient termitClient;
 
     @Autowired
-    public ArgumentService(ArgumentRepository argumentRepository, UserRepository userRepository, DebateRepository debateRepository, FallacyClient fallacyClient, Mapper mapper, DebateGenerationClient debateGenerationClient, ExplanationClient explanationClient){
+    public ArgumentService(ArgumentRepository argumentRepository, UserRepository userRepository, DebateRepository debateRepository, FallacyClient fallacyClient, Mapper mapper, DebateGenerationClient debateGenerationClient, ExplanationClient explanationClient, TermitClient termitClient){
         this.argumentRepository = argumentRepository;
         this.userRepository = userRepository;
         this.debateRepository = debateRepository;
@@ -45,12 +48,13 @@ public class ArgumentService {
         this.mapper = mapper;
         this.debateGenerationClient = debateGenerationClient;
         this.explanationClient = explanationClient;
+        this.termitClient = termitClient;
     }
 
     @Transactional
-    public ArgumentResponseDto createArgument(String text, ArgumentType type, Long parentId, Long debateId, String userId)
-            throws UserNotFoundException, DebateNotFoundException, ArgumentNotFoundException {
-        Optional<User> ownerOpt = userRepository.findByKeycloakId(userId);
+    public ArgumentResponseDto createArgument(String text, ArgumentType type, Long parentId, Long debateId, JwtAuthenticationToken token)
+            throws UserNotFoundException, DebateNotFoundException, ArgumentNotFoundException, ServiceNotRespondingException {
+        Optional<User> ownerOpt = userRepository.findByKeycloakId(token.getToken().getSubject());
         Optional<Argument> parentOpt = argumentRepository.findById(parentId);
         Optional<Debate> debateOpt = debateRepository.findById(debateId);
         if(ownerOpt.isEmpty()){
@@ -77,6 +81,8 @@ public class ArgumentService {
         debateArguments.add(argument);
         debate.setArguments(debateArguments);
         Argument newArgument = argumentRepository.save(argument);
+
+        termitClient.createArgumentFile(text, debateId, newArgument.getId(), token.getToken().getTokenValue());
 
         return mapper.toDto(newArgument);
     }

@@ -1,6 +1,7 @@
 package cvut.fel.kbss.service;
 
 import cvut.fel.kbss.client.DebateGenerationClient;
+import cvut.fel.kbss.client.TermitClient;
 import cvut.fel.kbss.dto.Mapper;
 import cvut.fel.kbss.dto.response.AIDebateResponse;
 import cvut.fel.kbss.dto.response.ArgumentResponseDto;
@@ -11,6 +12,7 @@ import cvut.fel.kbss.repository.ArgumentRepository;
 import cvut.fel.kbss.repository.DebateRepository;
 import cvut.fel.kbss.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,20 +26,22 @@ public class DebateService {
     private final ArgumentRepository argumentRepository;
     private final Mapper mapper;
     private final DebateGenerationClient debateGenerationClient;
+    private final TermitClient termitClient;
 
     @Autowired
-    public DebateService(UserRepository userRepository, DebateRepository debateRepository, ArgumentRepository argumentRepository, Mapper mapper, DebateGenerationClient debateGenerationClient){
+    public DebateService(UserRepository userRepository, DebateRepository debateRepository, ArgumentRepository argumentRepository, Mapper mapper, DebateGenerationClient debateGenerationClient, TermitClient termitClient){
         this.userRepository = userRepository;
         this.debateRepository = debateRepository;
         this.argumentRepository = argumentRepository;
         this.mapper = mapper;
         this.debateGenerationClient = debateGenerationClient;
+        this.termitClient = termitClient;
     }
 
 
     @Transactional
-    public DebateResponseDto createDebate(String topic, String thesis, DebateVisibility visibility, String keyCloakId) throws UserNotFoundException {
-        Optional<User> ownerOpt = userRepository.findByKeycloakId(keyCloakId);
+    public DebateResponseDto createDebate(String topic, String thesis, DebateVisibility visibility, JwtAuthenticationToken token) throws UserNotFoundException, ServiceNotRespondingException {
+        Optional<User> ownerOpt = userRepository.findByKeycloakId(token.getToken().getSubject());
         if(ownerOpt.isEmpty()){
             throw new UserNotFoundException("User not found");
         }
@@ -54,6 +58,8 @@ public class DebateService {
         debate.setVisibility(visibility);
 
         Debate newDebate = debateRepository.save(debate);
+        termitClient.createDictionary(topic, newDebate.getId(), token.getToken().getTokenValue());
+       // termitClient.createArgumentFile(thesis, debate.getId(), newDebate.getArguments().getFirst().getId(), token.getToken().getTokenValue());
         return mapper.toDto(newDebate);
     }
 

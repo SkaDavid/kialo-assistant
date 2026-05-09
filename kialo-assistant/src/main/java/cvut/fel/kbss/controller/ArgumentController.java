@@ -29,11 +29,11 @@ public class ArgumentController {
 
     @PostMapping
     public ResponseEntity<ArgumentResponseDto> createArgument(@RequestBody NewArgumentDto dto, JwtAuthenticationToken token)
-            throws UserNotFoundException, DebateNotFoundException, ArgumentNotFoundException {
+            throws UserNotFoundException, DebateNotFoundException, ArgumentNotFoundException, ServiceNotRespondingException {
         String keycloakId = token.getToken().getSubject();
         log.info("User {} is creating new argument", keycloakId);
 
-        ArgumentResponseDto response = this.argumentService.createArgument(dto.getText(), dto.getType(), dto.getParentId(), dto.getDebateId(), keycloakId);
+        ArgumentResponseDto response = this.argumentService.createArgument(dto.getText(), dto.getType(), dto.getParentId(), dto.getDebateId(), token);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 

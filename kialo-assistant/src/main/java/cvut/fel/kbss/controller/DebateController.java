@@ -28,7 +28,7 @@ public class DebateController {
 
     @PostMapping
     public ResponseEntity<DebateResponseDto> createDebate(@RequestBody NewDebateDto dto, JwtAuthenticationToken token)
-            throws UserNotFoundException {
+            throws UserNotFoundException, ServiceNotRespondingException {
         String keycloakId = token.getToken().getSubject();
         log.info("User {} is creating debate with {} topic", keycloakId, dto.getTopic());
 
@@ -36,7 +36,7 @@ public class DebateController {
                 dto.getTopic(),
                 dto.getThesis(),
                 dto.getVisibility(),
-                keycloakId
+                token
         );
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
