@@ -19,15 +19,8 @@ public class BertFallacyClient implements FallacyClient {
     public FallacyResponseDto testFallacy(String text) throws ServiceNotRespondingException {
         try {
             FallacyRequestDto request = new FallacyRequestDto(text);
-
             FallacyResponseDto response = restTemplate.postForObject("http://fallacy-detector:6161/analyze", request, FallacyResponseDto.class);
-
-            if (response != null) {
-                System.out.println("Výsledek z AI: " + response.getLabel());
-                System.out.println("Jistota: " + (response.getScore() * 100) + "%");
-                return response;
-            }
-            return null;
+            return response;
         } catch (Exception e) {
             throw new ServiceNotRespondingException("Error with contacting Bert: " + e.getMessage());
         }
