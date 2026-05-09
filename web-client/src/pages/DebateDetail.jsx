@@ -43,12 +43,36 @@ const DebateDetail = () => {
           activePath={activePath} 
           currentUser={keycloak.tokenParsed?.preferred_username}
           currentAction={{ replyArgId, updateArgId }}
-          handlers={{ 
-            onArgumentClick: () => setActivePath([thesis.id]), 
-            onOpenReply: (e, id) => { e.stopPropagation(); setReplyArgId(id); setUpdateArgId(null); },
-            setReplyArgId: setReplyArgId, 
-            setUpdateArgId: setUpdateArgId
-          }}
+          handlers={{
+                    onArgumentClick: handleArgumentClick,
+                    onOpenReply: (e, id) => { e.stopPropagation(); setReplyArgId(id); setUpdateArgId(null); },
+                    onOpenUpdate: (e, id) => { e.stopPropagation(); setUpdateArgId(id); setReplyArgId(null); },
+                    onDelete: async (e, id) => { e.stopPropagation(); await api.deleteArgument(id); fetchData(); },
+                    onSubmitReply: async (parentId, data) => { 
+                      await api.createArgument({ debateId: id, parentId: parentId, ...data });
+                      setReplyArgId(null); 
+                      fetchData(); 
+                    },
+                    onSubmitUpdate: async (id, data) => {
+                      await api.updateArgument(id, data);
+                      setUpdateArgId(null); 
+                      fetchData();
+                    },
+                    setReplyArgId: setReplyArgId, 
+                    setUpdateArgId: setUpdateArgId,
+                    onFallacyTest: async (e, text) => {
+                      e.stopPropagation();
+                      const data = await api.testFallacy(text);
+                      if(data){
+                        setArgumentFallacy({
+                          text: text,
+                          label: data.label,
+                          score: data.score,
+                          explanation: data.explanation
+                        });
+                      }
+                    }
+                  }}
         />
 
         {activePath.map(parentId => {
