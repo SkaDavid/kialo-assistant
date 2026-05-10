@@ -49,6 +49,10 @@ public class DebateService {
         User owner = ownerOpt.get();
         Debate debate = new Debate();
         Argument argument = new Argument(thesis, ArgumentType.THESIS, null, owner, debate);
+        TextSegment segment = new TextSegment(TextSegmentType.TEXT, thesis, null, null);
+        List<TextSegment> segments = new ArrayList<>();
+        segments.add(segment);
+        argument.setSegments(segments);
         List<Argument> newList = new ArrayList<>();
         newList.add(argument);
 

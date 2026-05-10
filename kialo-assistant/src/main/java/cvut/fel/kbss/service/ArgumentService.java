@@ -79,6 +79,7 @@ public class ArgumentService {
         argument.setParent(parent);
         argument.setType(type);
         argument.setText(text);
+        argument.setSegments(this.parseHtmlToSegments(text));
 
         List<Argument> debateArguments = debate.getArguments();
         debateArguments.add(argument);
@@ -163,6 +164,7 @@ public class ArgumentService {
             obj.put("parent", arg.getParent());
             obj.put("type", arg.getType());
             obj.put("text", arg.getText());
+            obj.put("segments", this.parseHtmlToSegments(arg.getText()));
 
             jsonArray.put(obj);
         }
