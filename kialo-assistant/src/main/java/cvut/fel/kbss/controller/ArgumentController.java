@@ -10,6 +10,7 @@ import cvut.fel.kbss.dto.response.FallacyResponseDto;
 import cvut.fel.kbss.exception.*;
 import cvut.fel.kbss.service.ArgumentService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -73,5 +74,15 @@ public class ArgumentController {
 
         AIArgumentResponseDto result = argumentService.generateArgument(dto.getText(), dto.getType(), dto.getDebate());
         return ResponseEntity.status(HttpStatus.OK).body(result);
+    }
+
+    @PostMapping("/sync-termit/{argumentId}")
+    public ResponseEntity<ArgumentResponseDto> synchronizeTermitArgument(@PathVariable long argumentId, JwtAuthenticationToken token) throws ServiceNotRespondingException, ArgumentNotFoundException {
+        String keycloakId = token.getToken().getSubject();
+        log.info("User {} is requesting termit sync on argument: " + argumentId, keycloakId);
+
+        ArgumentResponseDto response = argumentService.syncWithTermit(argumentId, token.getToken().getTokenValue());
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }

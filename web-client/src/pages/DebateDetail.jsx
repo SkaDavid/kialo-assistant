@@ -71,6 +71,10 @@ const DebateDetail = () => {
                           explanation: data.explanation
                         });
                       }
+                    },
+                    onSyncArgument: async (id) => {
+                      const response = await api.syncArgument(id);
+                      console.log(response);
                     }
                   }}
         />
@@ -115,6 +119,10 @@ const DebateDetail = () => {
                           explanation: data.explanation
                         });
                       }
+                    },
+                    onSyncArgument: async (id) => {
+                      e.stopPropagation();
+                      await api.syncArgument(id);
                     }
                   }}
                 />

@@ -85,6 +85,35 @@ public class TermitClient {
         }
     }
 
+    public String getArgumentContent(long debateId, long argumentId, String token) throws ServiceNotRespondingException {
+        String vocabIri = "http://onto.fel.cvut.cz/ontologies/slovnik/debate-" + debateId;
+        String localName = debateId + "-" + argumentId + ".html";
+        String fileNamespace = vocabIri + "/document/soubor/";
+
+        String url = "http://termit-server:8080/termit/rest/resources/" + localName + "/content?namespace="
+                + java.net.URLEncoder.encode(fileNamespace, java.nio.charset.StandardCharsets.UTF_8);
+
+        try (HttpClient client = HttpClient.newHttpClient()) {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(url))
+                    .header("Authorization", "Bearer " + token)
+                    .header("Accept", "text/html")
+                    .GET()
+                    .timeout(Duration.ofSeconds(20))
+                    .build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() != 200) {
+                throw new ServiceNotRespondingException("Termit error: " + response.statusCode() + " - " + response.body());
+            }
+
+            return response.body();
+        } catch (Exception e) {
+            throw new ServiceNotRespondingException("Failed to fetch content from Termit", e);
+        }
+    }
+
     private String createFileBody(String vocabIri, String localName) {
         return """
                 {

@@ -2,6 +2,7 @@ package cvut.fel.kbss.dto;
 
 import cvut.fel.kbss.dto.response.ArgumentResponseDto;
 import cvut.fel.kbss.dto.response.DebateResponseDto;
+import cvut.fel.kbss.dto.response.TextSegmentDto;
 import cvut.fel.kbss.dto.response.UserResponseDto;
 import cvut.fel.kbss.model.Argument;
 import cvut.fel.kbss.model.Debate;
@@ -21,6 +22,12 @@ public class Mapper {
         response.setParent(argument.getParent() != null ? argument.getParent().getId() : null);
         response.setOwner(argument.getOwner() != null ? this.toDto(argument.getOwner()) : null);
         response.setDebate(argument.getDebate() != null ? argument.getDebate().getId() : null);
+        if(argument.getSegments() != null){
+            response.setStructuredText(argument.getSegments().stream()
+                    .map(segment -> new TextSegmentDto(segment.getType(), segment.getContent(), segment.getExplanation()))
+                    .collect(Collectors.toList())
+            );
+        }
         return response;
     }
 

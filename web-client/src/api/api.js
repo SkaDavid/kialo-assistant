@@ -30,5 +30,6 @@ export const api = {
     createDebate: (dto) => request("/debate", { "method": "POST", "body": JSON.stringify(dto)}),
     createAIDebate: (dto) => request("/debate/ai", { "method": "POST", "body": JSON.stringify(dto)}),
     createAIArgument: (dto) => request("/argument/ai", { "method": "POST", body: JSON.stringify(dto)}),
-    importDebate: (dto) => request("/debate/import-debate", { "method": "POST", "body": JSON.stringify(dto)})
+    importDebate: (dto) => request("/debate/import-debate", { "method": "POST", "body": JSON.stringify(dto)}),
+    syncArgument: (id) => request(`/argument/sync-termit/${id}`, { "method": "POST" })
 }

@@ -11,20 +11,23 @@ import cvut.fel.kbss.dto.response.ArgumentResponseDto;
 import cvut.fel.kbss.dto.response.FallacyResponseDto;
 import cvut.fel.kbss.dto.response.ValidationResponse;
 import cvut.fel.kbss.exception.*;
-import cvut.fel.kbss.model.Argument;
-import cvut.fel.kbss.model.ArgumentType;
-import cvut.fel.kbss.model.Debate;
-import cvut.fel.kbss.model.User;
+import cvut.fel.kbss.model.*;
 import cvut.fel.kbss.repository.ArgumentRepository;
 import cvut.fel.kbss.repository.DebateRepository;
 import cvut.fel.kbss.repository.UserRepository;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Node;
+import org.jsoup.nodes.TextNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -165,4 +168,47 @@ public class ArgumentService {
         }
         return jsonArray.toString(4);
     }
+
+    public ArgumentResponseDto syncWithTermit(long argumentId, String token) throws ArgumentNotFoundException, ServiceNotRespondingException {
+        Optional<Argument> argumentOpt = argumentRepository.findById(argumentId);
+        if(argumentOpt.isEmpty()){
+            throw new ArgumentNotFoundException("Argument with id: " + argumentId + " not found");
+        }
+        Argument argument = argumentOpt.get();
+        long debateId = argument.getDebate().getId();
+
+        String htmlContent = termitClient.getArgumentContent(debateId, argumentId, token);
+        List<TextSegment> segments = parseHtmlToSegments(htmlContent);
+        argument.setSegments(segments);
+
+        argumentRepository.save(argument);
+        return mapper.toDto(argument);
+    }
+
+    private List<TextSegment> parseHtmlToSegments(String htmlContent) {
+        List<TextSegment> segments = new ArrayList<>();
+        Document document = Jsoup.parse(htmlContent);
+        Element body = document.body();
+        for(Node node : body.childNodes()){
+            if (node instanceof TextNode) {
+                String content = ((TextNode) node).getWholeText();
+                if (!content.isBlank()) {
+                    segments.add(new TextSegment(TextSegmentType.TEXT, content, null, null));
+                }
+            } else if (node instanceof Element element) {
+                if (element.tagName().equals("span")) {
+                    segments.add(new TextSegment(
+                            TextSegmentType.TERM,
+                            element.text(),
+                            null,
+                            element.attr("resource")
+                    ));
+                } else {
+                    segments.add(new TextSegment(TextSegmentType.TEXT, element.text(), null, null));
+                }
+            }
+        }
+        return segments;
+    }
+
 }

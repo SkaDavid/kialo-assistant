@@ -20,6 +20,7 @@ const Argument = ({ arg, activePath, currentUser, currentAction, handlers }) => 
               <button onClick={(e) => handlers.onDelete(e, arg.id)}>Delete</button>
               <button onClick={(e) => handlers.onOpenUpdate(e, arg.id)}>Change</button>
               <a href={termitLink} target="_blank">Go to termit</a>
+              <button onClick={() => handlers.onSyncArgument(arg.id)}>Sync</button>
             </>
           )}
         </div>

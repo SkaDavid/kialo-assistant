@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -31,6 +32,11 @@ public class Argument {
 
     @Column(name="text")
     private String text;
+
+    @ElementCollection
+    @CollectionTable(name = "argument_segments", joinColumns = @JoinColumn(name = "argument_id"))
+    @OrderColumn(name = "segment_order")
+    private List<TextSegment> segments = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
     @Column(name="type")

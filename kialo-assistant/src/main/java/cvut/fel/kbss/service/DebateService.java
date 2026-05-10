@@ -45,7 +45,7 @@ public class DebateService {
         if(ownerOpt.isEmpty()){
             throw new UserNotFoundException("User not found");
         }
-
+        //TODO
         User owner = ownerOpt.get();
         Debate debate = new Debate();
         Argument argument = new Argument(thesis, ArgumentType.THESIS, null, owner, debate);
