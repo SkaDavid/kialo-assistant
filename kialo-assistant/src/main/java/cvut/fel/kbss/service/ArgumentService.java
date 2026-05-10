@@ -114,11 +114,11 @@ public class ArgumentService {
     }
 
     @Transactional
-    public ArgumentResponseDto updateArgument(Long id, String newText, ArgumentType newType, String keycloakId)
-            throws ArgumentNotFoundException, UnauthorizedAccessException, UserNotFoundException {
+    public ArgumentResponseDto updateArgument(long argumentId, String newText, ArgumentType newType, JwtAuthenticationToken token)
+            throws ArgumentNotFoundException, UnauthorizedAccessException, UserNotFoundException, ServiceNotRespondingException {
 
-        Optional<Argument> argumentOpt = argumentRepository.findById(id);
-        Optional<User> userOpt = userRepository.findByKeycloakId(keycloakId);
+        Optional<Argument> argumentOpt = argumentRepository.findById(argumentId);
+        Optional<User> userOpt = userRepository.findByKeycloakId(token.getToken().getSubject());
         if(argumentOpt.isEmpty()){
             throw new ArgumentNotFoundException("Argument not found");
         }
@@ -132,6 +132,10 @@ public class ArgumentService {
         }
         argument.setText(newText);
         argument.setType(newType);
+        argument.setSegments(this.parseHtmlToSegments(newText));
+
+        long debateId = argument.getDebate().getId();
+        termitClient.updateArgumentFile(debateId, argumentId, newText, token.getToken().getTokenValue());
         argumentRepository.save(argument);
         return mapper.toDto(argument);
     }

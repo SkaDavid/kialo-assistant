@@ -244,7 +244,7 @@ public class TermitClient {
         String vocabIri = "http://onto.fel.cvut.cz/ontologies/slovnik/debate-" + debateId;
         String fileName = debateId + "-" + argumentId + ".html";
         String resourceLocalName = "document";
-        
+
         String fileNamespace = vocabIri + "/document/soubor/";
 
         String url = "http://termit-server:8080/termit/rest/resources/" + resourceLocalName
@@ -267,6 +267,41 @@ public class TermitClient {
             }
         } catch (Exception e) {
             throw new ServiceNotRespondingException("Connection error during file deletion", e);
+        }
+    }
+
+    public void updateArgumentFile(long debateId, long argumentId, String newText, String token) throws ServiceNotRespondingException {
+        String vocabIri = "http://onto.fel.cvut.cz/ontologies/slovnik/debate-" + debateId;
+        String localName = debateId + "-" + argumentId + ".html";
+        String fileNamespace = vocabIri + "/document/soubor/";
+
+        String url = "http://termit-server:8080/termit/rest/resources/" + localName + "/content?namespace="
+                + java.net.URLEncoder.encode(fileNamespace, java.nio.charset.StandardCharsets.UTF_8);
+
+        try (HttpClient client = HttpClient.newHttpClient()) {
+            String boundary = "JavaHttpClientBoundary" + System.currentTimeMillis();
+            String htmlContent = "<html><body>" + newText + "</body></html>";
+            String multipartBody = "--" + boundary + "\r\n" +
+                    "Content-Disposition: form-data; name=\"file\"; filename=\"" + localName + "\"\r\n" +
+                    "Content-Type: text/html\r\n\r\n" +
+                    htmlContent + "\r\n" +
+                    "--" + boundary + "--\r\n";
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(url))
+                    .header("Content-Type", "multipart/form-data; boundary=" + boundary)
+                    .header("Authorization", "Bearer " + token)
+                    .PUT(HttpRequest.BodyPublishers.ofString(multipartBody))
+                    .timeout(Duration.ofSeconds(20))
+                    .build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() != 204 && response.statusCode() != 200) {
+                throw new ServiceNotRespondingException("Failed to update content: " + response.statusCode());
+            }
+        } catch (Exception e) {
+            throw new ServiceNotRespondingException("Error during Termit content update", e);
         }
     }
 }
