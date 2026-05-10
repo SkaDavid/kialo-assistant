@@ -50,11 +50,11 @@ public class ArgumentController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteArgument(@PathVariable Long id, JwtAuthenticationToken token)
-            throws UnauthorizedAccessException, ArgumentNotFoundException, UserNotFoundException {
+            throws UnauthorizedAccessException, ArgumentNotFoundException, UserNotFoundException, ServiceNotRespondingException {
         String keycloakId = token.getToken().getSubject();
         log.info("User {} is deleting argument {}", keycloakId, id);
 
-        this.argumentService.deleteArgument(id, keycloakId);
+        this.argumentService.deleteArgument(id, token);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 

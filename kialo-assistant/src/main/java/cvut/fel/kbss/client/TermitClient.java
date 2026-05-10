@@ -231,14 +231,42 @@ public class TermitClient {
                     .build();
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() != 200) {
-                System.out.println(response.statusCode());
                 throw new ServiceNotRespondingException("Failed to fetch term definition from Termit");
             }
             JSONObject body = new JSONObject(response.body());
-            System.out.println(body.getJSONObject("definition").getString("en"));
             return body.getJSONObject("definition").getString("en");
         } catch (Exception e) {
             throw new ServiceNotRespondingException("Failed to fetch term definition from Termit", e);
+        }
+    }
+
+    public void deleteArgumentFile(long debateId, long argumentId, String token) throws ServiceNotRespondingException {
+        String vocabIri = "http://onto.fel.cvut.cz/ontologies/slovnik/debate-" + debateId;
+        String fileName = debateId + "-" + argumentId + ".html";
+        String resourceLocalName = "document";
+        
+        String fileNamespace = vocabIri + "/document/soubor/";
+
+        String url = "http://termit-server:8080/termit/rest/resources/" + resourceLocalName
+                + "/files/" + fileName
+                + "?namespace=" + java.net.URLEncoder.encode(fileNamespace, java.nio.charset.StandardCharsets.UTF_8);
+
+        try (HttpClient client = HttpClient.newHttpClient()) {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(url))
+                    .header("Authorization", "Bearer " + token)
+                    .DELETE()
+                    .timeout(Duration.ofSeconds(20))
+                    .build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() >= 400) {
+                System.err.println("Smazání v Termitu selhalo: " + response.statusCode() + " - " + response.body());
+                throw new ServiceNotRespondingException("Failed to delete file from Termit: " + response.statusCode());
+            }
+        } catch (Exception e) {
+            throw new ServiceNotRespondingException("Connection error during file deletion", e);
         }
     }
 }

@@ -92,9 +92,9 @@ public class ArgumentService {
     }
 
     @Transactional
-    public void deleteArgument(Long argumentId, String keycloakId) throws ArgumentNotFoundException, UnauthorizedAccessException, UserNotFoundException {
+    public void deleteArgument(Long argumentId, JwtAuthenticationToken token) throws ArgumentNotFoundException, UnauthorizedAccessException, UserNotFoundException, ServiceNotRespondingException {
         Optional<Argument> argumentOpt = argumentRepository.findById(argumentId);
-        Optional<User> userOpt = userRepository.findByKeycloakId(keycloakId);
+        Optional<User> userOpt = userRepository.findByKeycloakId(token.getToken().getSubject());
         if(argumentOpt.isEmpty()){
             throw new ArgumentNotFoundException("Argument you wish to delete was not found");
         }
@@ -107,6 +107,9 @@ public class ArgumentService {
         if(!argument.getOwner().getKeycloakId().equals(user.getKeycloakId())){
             throw new UnauthorizedAccessException("User is not the owner of the argument");
         }
+
+        long debateId = argument.getDebate().getId();
+        termitClient.deleteArgumentFile(debateId, argumentId, token.getToken().getTokenValue());
         argumentRepository.deleteById(argumentId);
     }
 

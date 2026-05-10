@@ -74,7 +74,6 @@ const DebateDetail = () => {
                     },
                     onSyncArgument: async (id) => {
                       const response = await api.syncArgument(id);
-                      console.log(response);
                     }
                   }}
         />
@@ -122,7 +121,6 @@ const DebateDetail = () => {
                     },
                     onSyncArgument: async (id) => {
                       await api.syncArgument(id);
-                      console.log(response);
                     }
                   }}
                 />
