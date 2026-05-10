@@ -9,7 +9,11 @@ const Argument = ({ arg, activePath, currentUser, currentAction, handlers }) => 
   return (
     <div className={activePath.includes(arg.id) ? "active argument-wrapper" : "argument-wrapper"}>
       <article className={arg.type} onClick={() => handlers.onArgumentClick(arg)}>
-        <p>{arg.text}</p>
+        {arg.structuredText.map(segment => (segment.type === "TERM" ? 
+          <span className="term" onClick={()=>{console.log("Heyy")}}>{segment.text}</span>
+          : 
+          <span>{segment.text}</span>
+        ))}
         <p className="owner">{arg.owner.username}</p>
         
         <div className="actions">

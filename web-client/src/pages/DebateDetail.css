@@ -63,3 +63,11 @@
     border-radius: 5px;
 }
 
+.term{
+    text-decoration: underline;
+    color:aqua;
+    &:hover{
+        cursor: pointer;
+    }
+}
+
