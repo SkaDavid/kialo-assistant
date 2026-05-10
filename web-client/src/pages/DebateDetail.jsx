@@ -121,8 +121,8 @@ const DebateDetail = () => {
                       }
                     },
                     onSyncArgument: async (id) => {
-                      e.stopPropagation();
                       await api.syncArgument(id);
+                      console.log(response);
                     }
                   }}
                 />

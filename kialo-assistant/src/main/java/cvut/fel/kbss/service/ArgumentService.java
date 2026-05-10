@@ -169,6 +169,7 @@ public class ArgumentService {
         return jsonArray.toString(4);
     }
 
+    @Transactional
     public ArgumentResponseDto syncWithTermit(long argumentId, String token) throws ArgumentNotFoundException, ServiceNotRespondingException {
         Optional<Argument> argumentOpt = argumentRepository.findById(argumentId);
         if(argumentOpt.isEmpty()){
@@ -179,6 +180,11 @@ public class ArgumentService {
 
         String htmlContent = termitClient.getArgumentContent(debateId, argumentId, token);
         List<TextSegment> segments = parseHtmlToSegments(htmlContent);
+        for(TextSegment segment : segments){
+            if(segment.getType().equals(TextSegmentType.TERM)){
+                segment.setExplanation(termitClient.findDefinition(segment.getResource(), token));
+            }
+        }
         argument.setSegments(segments);
 
         argumentRepository.save(argument);
@@ -196,7 +202,7 @@ public class ArgumentService {
                     segments.add(new TextSegment(TextSegmentType.TEXT, content, null, null));
                 }
             } else if (node instanceof Element element) {
-                if (element.tagName().equals("span")) {
+                if (element.tagName().equals("span") && element.hasAttr("resource")) {
                     segments.add(new TextSegment(
                             TextSegmentType.TERM,
                             element.text(),
@@ -210,5 +216,4 @@ public class ArgumentService {
         }
         return segments;
     }
-
 }

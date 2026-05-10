@@ -1,6 +1,7 @@
 package cvut.fel.kbss.client;
 
 import cvut.fel.kbss.exception.ServiceNotRespondingException;
+import org.json.JSONObject;
 import org.springframework.stereotype.Component;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -99,7 +100,7 @@ public class TermitClient {
                     .header("Authorization", "Bearer " + token)
                     .header("Accept", "text/html")
                     .GET()
-                    .timeout(Duration.ofSeconds(20))
+                    .timeout(Duration.ofSeconds(30))
                     .build();
 
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
@@ -131,33 +132,6 @@ public class TermitClient {
                     }
                 }
                 """.formatted(vocabIri, localName);
-    }
-
-    private int executePost(String url, String body, String contentType, String token) throws Exception {
-        try (HttpClient client = HttpClient.newHttpClient()) {
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(url))
-                    .header("Content-Type", contentType)
-                    .header("Authorization", "Bearer " + token)
-                    .POST(HttpRequest.BodyPublishers.ofString(body))
-                    .build();
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            System.out.println("POST " + url + " | Status: " + response.statusCode());
-            return response.statusCode();
-        }
-    }
-
-    private void executePut(String url, String content, String contentType, String token) throws Exception {
-        try (HttpClient client = HttpClient.newHttpClient()) {
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(url))
-                    .header("Content-Type", contentType)
-                    .header("Authorization", "Bearer " + token)
-                    .PUT(HttpRequest.BodyPublishers.ofString(content))
-                    .build();
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            System.out.println("PUT " + url + " | Status: " + response.statusCode());
-        }
     }
 
     private String createDictionaryBody(String topic, long debateId) {
@@ -238,5 +212,33 @@ public class TermitClient {
                      }
                  }
                   """.formatted(topic, debateId);
+    }
+
+    public String findDefinition(String resource, String token) throws ServiceNotRespondingException {
+        String localName = resource.substring(resource.lastIndexOf("/") + 1);
+        String namespace = resource.substring(0, resource.lastIndexOf("/") + 1);
+
+        String url = "http://termit-server:8080/termit/rest/terms/" + localName
+                + "?namespace=" + java.net.URLEncoder.encode(namespace, java.nio.charset.StandardCharsets.UTF_8);
+
+        try (HttpClient client = HttpClient.newHttpClient()) {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(url))
+                    .header("Authorization", "Bearer " + token)
+                    .header("Accept", "application/json")
+                    .GET()
+                    .timeout(Duration.ofSeconds(30))
+                    .build();
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() != 200) {
+                System.out.println(response.statusCode());
+                throw new ServiceNotRespondingException("Failed to fetch term definition from Termit");
+            }
+            JSONObject body = new JSONObject(response.body());
+            System.out.println(body.getJSONObject("definition").getString("en"));
+            return body.getJSONObject("definition").getString("en");
+        } catch (Exception e) {
+            throw new ServiceNotRespondingException("Failed to fetch term definition from Termit", e);
+        }
     }
 }
