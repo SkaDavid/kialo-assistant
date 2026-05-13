@@ -1,26 +1,16 @@
 {
   "manifest_version": 3,
-  "name": "Assistant extension",
-  "version": "1.0",
-
-  "description": "Assistant extension",
-
-  "permissions": ["sidePanel", "scripting", "activeTab", "identity", "storage"], 
+  "name": "Kialo Assistant",
+  "version": "1.0.0",
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA4s3DfvrOX+XIDAtO/AAdLCEAphVUngDY0uB8703pGLjXHFBsFtFkoYiSur8mXzNPDIwfmJjZ/wGTEYQS6Yd+cVEiyfnxmWfjuBDhwFOGoQuVtydJQG8l5VmQqMaQY1g+lsnsEfX2gzmggopg9srE03kEC/IvqkjyggplKX+WGq0sInpz90EDa/3lon1yoYukIT8ukqKbn39vX10FQwfuSPqC5nay6bhWxk3tMphmdktmQm0Wd0nC3WriwT4KPegFC25752J+lf/IA07gP5PppahwF2shVgjissYDcK7smQgjX9r43TwhVDoTEpZFZiqnZa33QXj27PRrnajvbOzlbwIDAQAB",
+  "action": { "default_title": "Open Sidepanel" },
+  "permissions": ["sidePanel", "identity", "storage"],
   "host_permissions": ["https://www.kialo.com/*", "http://localhost:8082/*", "http://localhost:1234/*"],
   "background": {
-    "service_worker": "background.js"
-  },
-  "content_scripts": [
-    {
-      "matches": ["https://www.kialo.com/*"],
-      "js": ["content.js"]
-    }
-  ],
-  "action": {
-    "default_icon": "assets/icon.png",
-    "default_title": "Kialo extension"
+    "service_worker": "src/background.js",
+    "type": "module"
   },
   "side_panel": {
-    "default_path": "sidepanel.html"
+    "default_path": "index.html"
   }
 }
