@@ -5,40 +5,48 @@ function App() {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [completeDebate, setCompleteDebate] = useState("");
     const [currentDebateInfo, setCurrentDebateInfo] = useState({ debateId: "", argumentVersions: [] });
-    const [assistantInfo, setAssistantInfo] = useState({});
+    const [assistantInfo, setAssistantInfo] = useState({ isPresent: null, id: null, argumentVersions: null });
+    const [unknownArguments, setUnknownArguments] = useState([]);
+    const [modifiedArguments, setModifiedArguments] = useState([]);
 
 
     useEffect(() => {
-    chrome.storage.local.get(["access_token"], (result) => {
-        if (result.access_token) setIsLoggedIn(true);
-    });
-
-    const fetchContentData = async () => {
+    const initData = async () => {
         try {
-            const info = await contentApi.getDebateInfo();
-            setCurrentDebateInfo(info);
+            const contentInfo = await contentApi.getDebateInfo();
+            setCurrentDebateInfo(contentInfo);
+
+            if (contentInfo?.debateId) {
+                const assistInfo = await assistantApi.getDebateInfo(contentInfo.debateId);
+                setAssistantInfo(assistInfo);
+
+                if (assistInfo?.argumentVersions) {
+                    const newArguments = assistInfo.argumentVersions.filter(argument => argument.kialoId == null);
+                    let fullArguments = [];
+                    for (const argument of newArguments) {
+                        const detail = await assistantApi.getArgument(argument.id);
+                        fullArguments.push(detail);
+                    }
+                    setUnknownArguments(fullArguments);
+                        let foundModifiedArguments = [];
+                        currentDebateInfo.argumentVersions.forEach(kialoArgument => {
+                            const assistantArgument = assistInfo.argumentVersions.find(assistantArgument => assistantArgument.id === kialoArgument.id);
+                            if(assistantArgument && assistantArgument.version !== kialoArgument.version){
+                                console.log("found modified " + assistantArgument.id);
+                                foundModifiedArguments.push(assistantArgument);
+                            }
+                        });
+                        setModifiedArguments(foundModifiedArguments)
+                }
+            }
         } catch (err) {
-            console.error("Chyba při načítání info z content scriptu:", err);
+            console.error("Něco se nepovedlo:", err);
         }
     };
 
-    fetchContentData();
-    }, []);
+    initData();
+}, []);
 
-    useEffect(() => {
-            if (currentDebateInfo.debateId) {
-            const fetchAssistantData = async () => {
-                try {
-                    const info = await assistantApi.getDebateInfo(currentDebateInfo.debateId);
-                    setAssistantInfo(info);
-                    console.log("Data z backendu přijata:", info);
-                } catch (err) {
-                    console.error("Chyba při načítání dat z backendu:", err);
-                }
-            };
-            fetchAssistantData();
-        }
-    }, [currentDebateInfo.debateId]);
 
     const login = () => {
         chrome.runtime.sendMessage({ action: "login" }, (res) => {
@@ -65,10 +73,26 @@ function App() {
         <button onClick={login}>Log in through keycloak</button>
       ) : (
         <div>
-            {currentDebateInfo.isPresent &&
+            {!currentDebateInfo.isPresent &&
                 <button onClick={handleImportDebate}>Import debate</button>
             }  
             <p>{completeDebate}</p>
+            <h2>Unknown</h2>
+            {unknownArguments.map((argument) => (
+                <article key={argument.id} style={{ border: "2px solid yellow", marginBottom: "10px", padding: "5px" }}>
+                    <p><strong>ID:</strong> {argument.id}</p>
+                    <p><strong>Text:</strong> {argument.text}</p>
+                    <p><strong>Type:</strong> {argument.type}</p>
+                </article>
+            ))}
+
+            <h2>Modified on Kialo</h2>
+            {modifiedArguments.map((version) => (
+                <article key={argument.id} style={{ border: "2px solid white", marginBottom: "10px", padding: "5px" }}>
+                    <p><strong>ID:</strong> {argument.id}</p>
+                    <p><strong>Version:</strong> {argument.version}</p>
+                </article>
+            ))}
           
             <button onClick={logout} style={{ marginBottom: '10px' }}>Logout</button>
           

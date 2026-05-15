@@ -3,7 +3,6 @@ const ASSISTANT_URL = "http://localhost:8082";
 
 const assistantRequest = async (endpoint, options) => {
     const token = await chrome.storage.local.get("access_token");
-    console.log(token.access_token);
     const headers = {
         "Content-type": "application/json",
         "Authorization": `Bearer ${token.access_token}`
@@ -40,7 +39,8 @@ const contentRequest = (action, payload = {}) => {
 
 export const assistantApi = {
     createDebate: (dto) => assistantRequest(`/debate/import-debate`, { "method": "POST", "body": JSON.stringify(dto)}),
-    getDebateInfo: (debateId) => assistantRequest(`/debate/kialo-info/${debateId}`, { "method": "GET" })
+    getDebateInfo: (debateId) => assistantRequest(`/debate/kialo-info/${debateId}`, { "method": "GET" }),
+    getArgument: (argumentId) => assistantRequest( `/argument/${argumentId}`, { "method": "GET" })
 }
 
 export const contentApi = {
