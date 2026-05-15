@@ -107,8 +107,8 @@ public class DebateService {
     }
 
     @Transactional
-    public DebateResponseDto saveGeneratedDebate(AIDebateResponse dto, String keycloakId) throws UserNotFoundException {
-        User owner = userRepository.findByKeycloakId(keycloakId).orElseThrow(() -> new UserNotFoundException("User not found"));
+    public DebateResponseDto saveGeneratedDebate(AIDebateResponse dto, JwtAuthenticationToken token) throws UserNotFoundException, ServiceNotRespondingException {
+        User owner = userRepository.findByKeycloakId(token.getToken().getSubject()).orElseThrow(() -> new UserNotFoundException("User not found"));
 
         Debate debate = new Debate();
         debate.setTopic(dto.getTopic());
@@ -119,7 +119,9 @@ public class DebateService {
 
         final Debate savedDebate = debateRepository.save(debate);
 
-        argumentService.saveArgumentTree(dto.getArguments(), savedDebate, owner);
+        termitClient.createDictionary(dto.getTopic(), savedDebate.getId(), token.getToken().getTokenValue());
+
+        argumentService.saveArgumentTree(dto.getArguments(), savedDebate, owner, token);
 
         return mapper.toDto(savedDebate);
     }

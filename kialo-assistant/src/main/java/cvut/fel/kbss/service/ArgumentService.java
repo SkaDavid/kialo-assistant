@@ -166,7 +166,7 @@ public class ArgumentService {
     }
 
     @Transactional
-    public void saveArgumentTree(List<ArgumentResponseDto> dtos, Debate debate, User owner) {
+    public void saveArgumentTree(List<ArgumentResponseDto> dtos, Debate debate, User owner, JwtAuthenticationToken token) throws ServiceNotRespondingException {
         Map<Long, Argument> idMapping = new HashMap<>();
         List<ArgumentResponseDto> remainingArguments = new ArrayList<>(dtos);
 
@@ -189,6 +189,7 @@ public class ArgumentService {
                     Argument newArg = createArgumentEntity(dto, parentEntity, debate, owner);
 
                     Argument savedArg = argumentRepository.save(newArg);
+                    termitClient.createArgumentFile(savedArg.getText(), savedArg.getDebate().getId(), savedArg.getId(), token.getToken().getTokenValue());
                     idMapping.put(dto.getId(), savedArg);
                     toRemove.add(dto);
                 }
