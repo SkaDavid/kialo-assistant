@@ -68,6 +68,7 @@ public class Mapper {
 
     public ArgumentVersionDto toVersionDto(Argument argument){
         ArgumentVersionDto dto = new ArgumentVersionDto();
+        dto.setId(argument.getId());
         dto.setVersion(argument.getKialoVersion());
         dto.setKialoId(argument.getKialoId());
         return dto;

@@ -225,4 +225,22 @@ public class ArgumentService {
         }
         return segments;
     }
+
+    public ArgumentResponseDto getArgument(Long argumentId, String keyCloakId) throws ArgumentNotFoundException, UserNotFoundException, UnauthorizedAccessException {
+        Optional<Argument> argumentOpt = argumentRepository.findById(argumentId);
+        Optional<User> userOpt = userRepository.findByKeycloakId(keyCloakId);
+        if(argumentOpt.isEmpty()){
+            throw new ArgumentNotFoundException("Argument not found");
+        }
+        if(userOpt.isEmpty()){
+            throw new UserNotFoundException("User not found");
+        }
+        User user = userOpt.get();
+        Argument argument = argumentOpt.get();
+        if (!argument.getOwner().getKeycloakId().equals(user.getKeycloakId())) {
+            throw new UnauthorizedAccessException("You are not the owner of this argument");
+        }
+
+        return mapper.toDto(argument);
+    }
 }

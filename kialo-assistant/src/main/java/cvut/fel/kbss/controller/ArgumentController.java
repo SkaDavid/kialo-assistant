@@ -14,6 +14,7 @@ import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 
@@ -36,6 +37,15 @@ public class ArgumentController {
 
         ArgumentResponseDto response = this.argumentService.createArgument(dto.getText(), dto.getType(), dto.getParentId(), dto.getDebateId(), token);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ArgumentResponseDto> getArgument(@PathVariable Long id, JwtAuthenticationToken token) throws UserNotFoundException, UnauthorizedAccessException, ArgumentNotFoundException {
+        String keycloakId = token.getToken().getSubject();
+        log.info("User {} is requesting argument {}", keycloakId, id);
+
+        ArgumentResponseDto argument = argumentService.getArgument(id, token.getToken().getSubject());
+        return ResponseEntity.status(HttpStatus.OK).body(argument);
     }
 
     @PutMapping("/{id}")

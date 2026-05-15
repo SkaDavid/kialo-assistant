@@ -10,6 +10,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ArgumentVersionDto {
+    private Long id;
     private Long kialoId;
     private Integer version;
 }
