@@ -40,11 +40,16 @@ const contentRequest = (action, payload = {}) => {
 
 export const assistantApi = {
     createDebate: (dto) => assistantRequest(`/debate/import-debate`, { "method": "POST", "body": JSON.stringify(dto)}),
+    getDebateInfo: (debateId) => assistantRequest(`/debate/kialo-info/${debateId}`, { "method": "GET" })
 }
 
 export const contentApi = {
-    getDebateInfo: async () => {
-        const res = await contentRequest("getDebate");
-        return res.debate;
+    getCompleteDebateInfo: async () => {
+        const result = await contentRequest("getDebate");
+        return result.debate;
     },
+    getDebateInfo: async () => {
+        const result = await contentRequest("getDebateInfo");
+        return result.debateInfo;
+    }
 };

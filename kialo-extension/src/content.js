@@ -3,8 +3,13 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === "getDebate") {
         handleGetDebate(sendResponse);
         return true; 
+    } else if (request.action === "getDebateInfo") {
+        handleGetDebateInfo(sendResponse);
+        return true;
     }
-});
+})
+
+
 
 const handleGetDebate = async (sendResponse) => {
     try {
@@ -13,7 +18,24 @@ const handleGetDebate = async (sendResponse) => {
     } catch (err) {
         sendResponse({ error: err.message });
     }
-};
+}
+
+const handleGetDebateInfo = async (sendResponse) => {
+    try{
+        const info = await getDebateInfo();
+        sendResponse({ debateInfo: info });
+    } catch (err) {
+        sendResponse({ error: err.message });
+    }
+}
+
+
+const getDebateInfo = async () => {
+    return {
+        debateId: getDebateId(),
+        argumentVersions: getArgumentVersions()
+    }
+}
 
 const getDebate = async () => {
     const csrfToken = getToken();
@@ -26,9 +48,15 @@ const getDebate = async () => {
     return {
         debateId: debateId,
         topic: topic,
-        arguments: debateArguments
+        arguments: parseArguments(debateArguments, debateId)
     };
-};
+}
+
+const getArgumentVersions = () => {
+    /* kialo request nize */
+    const claims = getOfflineDebate().claims;
+    return claims.map(claim => ({id: claim.id, version: claim.version}))
+}
 
 const getDebateId = () => {
     return window.location.href.substring(window.location.href.lastIndexOf('/') + 1);
@@ -43,6 +71,45 @@ const getToken = () => {
     const csrfCookie = document.cookie.match(new RegExp(name + "=([^;]+)"))?.[1];
     const csrfToken = csrfCookie ? csrfCookie : null;
     return csrfToken;
+}
+
+
+
+
+
+const parseArguments = (rawArguments, debateId) => {
+    const claims = rawArguments.claims;
+    const locations = rawArguments.locations;
+    const parsedArguments = [];
+
+    claims.forEach((claim) => {
+        if(claim.id == debateId + ".0"){
+            return;
+        }
+        const claimsLocation = locations.find(location => location.targetId == claim.id);
+
+        let claimsType;
+        if(claimsLocation.relation == 0){
+            claimsType = "THESIS";
+        } else{
+            claimsLocation.relation == 1 ? claimsType = "PRO" : claimsType = "CON";
+        }
+
+        const argumentId = claim.id.split(".")[1];
+        const parentId = claimsLocation.parentId.split(".")[1];
+
+        const newArgument = {
+            id: argumentId,
+            text: claim.text,
+            type: claimsType, 
+            parent: parentId,
+            version: claim.version
+        }
+        parsedArguments.push(newArgument);
+    });
+
+    console.log(parsedArguments);
+    return parsedArguments;
 }
 
 

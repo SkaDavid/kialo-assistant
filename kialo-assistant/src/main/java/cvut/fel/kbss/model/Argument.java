@@ -62,4 +62,10 @@ public class Argument {
     @ManyToOne
     @JoinColumn(name = "debate_id")
     private Debate debate;
+
+    @Column(name="kialo_id")
+    private Long kialoId;
+
+    @Column(name="kialo_version")
+    private Integer kialoVersion;
 }

@@ -1,14 +1,13 @@
 package cvut.fel.kbss.dto;
 
-import cvut.fel.kbss.dto.response.ArgumentResponseDto;
-import cvut.fel.kbss.dto.response.DebateResponseDto;
-import cvut.fel.kbss.dto.response.TextSegmentDto;
-import cvut.fel.kbss.dto.response.UserResponseDto;
+import cvut.fel.kbss.dto.response.*;
 import cvut.fel.kbss.model.Argument;
 import cvut.fel.kbss.model.Debate;
 import cvut.fel.kbss.model.User;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
@@ -53,5 +52,24 @@ public class Mapper {
                 .collect(Collectors.toList()) : null
         );
         return response;
+    }
+
+    public DebateInfoDto toDebateInfoDto(Debate debate){
+        DebateInfoDto dto = new DebateInfoDto();
+        dto.setPresent(true);
+        dto.setId(debate.getId());
+        List<ArgumentVersionDto> versions = new ArrayList<>();
+        for(Argument argument : debate.getArguments()){
+            versions.add(this.toVersionDto(argument));
+        }
+        dto.setArgumentVersions(versions);
+        return dto;
+    }
+
+    public ArgumentVersionDto toVersionDto(Argument argument){
+        ArgumentVersionDto dto = new ArgumentVersionDto();
+        dto.setVersion(argument.getKialoVersion());
+        dto.setKialoId(argument.getKialoId());
+        return dto;
     }
 }

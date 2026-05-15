@@ -30,4 +30,7 @@ public class Debate {
     @Enumerated(EnumType.STRING)
     private DebateVisibility visibility;
 
+    @Column(name="kialo_id")
+    private Long kialoId;
+
 }

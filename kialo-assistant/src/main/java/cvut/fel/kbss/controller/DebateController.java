@@ -3,6 +3,7 @@ package cvut.fel.kbss.controller;
 import cvut.fel.kbss.dto.request.NewDebateDto;
 import cvut.fel.kbss.dto.request.UpdateDebateDto;
 import cvut.fel.kbss.dto.response.AIDebateResponse;
+import cvut.fel.kbss.dto.response.DebateInfoDto;
 import cvut.fel.kbss.dto.response.DebateResponseDto;
 import cvut.fel.kbss.exception.*;
 import cvut.fel.kbss.service.DebateService;
@@ -91,4 +92,15 @@ public class DebateController {
         DebateResponseDto response = debateService.saveGeneratedDebate(dto, keycloakId);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
+
+    @GetMapping("/kialo-info/{kialoDebateId}")
+    public ResponseEntity<DebateInfoDto> getDebateInfo(@PathVariable Long kialoDebateId, JwtAuthenticationToken token){
+        String keycloakId = token.getToken().getSubject();
+        log.info("User {} is checking kialo debate {} status.", keycloakId, kialoDebateId);
+
+        DebateInfoDto dto = debateService.getDebateInfo(kialoDebateId);
+
+        return ResponseEntity.status(HttpStatus.OK).body(dto);
+    }
+
 }

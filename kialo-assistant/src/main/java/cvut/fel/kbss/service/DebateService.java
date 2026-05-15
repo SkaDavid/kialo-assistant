@@ -5,6 +5,7 @@ import cvut.fel.kbss.client.TermitClient;
 import cvut.fel.kbss.dto.Mapper;
 import cvut.fel.kbss.dto.response.AIDebateResponse;
 import cvut.fel.kbss.dto.response.ArgumentResponseDto;
+import cvut.fel.kbss.dto.response.DebateInfoDto;
 import cvut.fel.kbss.dto.response.DebateResponseDto;
 import cvut.fel.kbss.exception.*;
 import cvut.fel.kbss.model.*;
@@ -142,7 +143,8 @@ public class DebateService {
         debate.setOwner(owner);
         debate.setVisibility(DebateVisibility.PRIVATE);
         debate.setArguments(new ArrayList<>());
-        final Debate savedDebate = debateRepository.save(debate);
+        debate.setKialoId(dto.getDebateId());
+        Debate savedDebate = debateRepository.save(debate);
 
         Map<Long, Argument> idMapping = new HashMap<>();
         List<ArgumentResponseDto> remainingArguments = new ArrayList<>(dto.getArguments());
@@ -159,6 +161,8 @@ public class DebateService {
         thesis.setOwner(owner);
         thesis.setDebate(savedDebate);
         thesis.setSegments(this.parseHtmlToSegments(thesisDto.getText()));
+        thesis.setKialoId(thesisDto.getId());
+        thesis.setKialoVersion(thesisDto.getVersion());
 
         Argument savedThesis = argumentRepository.save(thesis);
         idMapping.put(thesisDto.getId(), savedThesis);
@@ -177,6 +181,8 @@ public class DebateService {
                     newArgument.setOwner(owner);
                     newArgument.setDebate(savedDebate);
                     newArgument.setSegments(parseHtmlToSegments(argumentDto.getText()));
+                    newArgument.setKialoId(argumentDto.getId());
+                    newArgument.setKialoVersion(argumentDto.getVersion());
 
                     Argument savedArg = argumentRepository.save(newArgument);
                     idMapping.put(argumentDto.getId(), savedArg);
@@ -212,5 +218,13 @@ public class DebateService {
             }
         }
         return segments;
+    }
+
+    public DebateInfoDto getDebateInfo(Long kialoDebateId) {
+        Debate debate = debateRepository.findDebateByKialoId(kialoDebateId);
+        if(debate != null){
+            return mapper.toDebateInfoDto(debate);
+        }
+        return new DebateInfoDto(false, null, null);
     }
 }

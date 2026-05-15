@@ -15,5 +15,7 @@ public interface DebateRepository extends JpaRepository<Debate, Long> {
 
     @Query("SELECT d FROM Debate d WHERE d.visibility = 'PUBLIC' OR d.owner.keycloakId = :userKeycloakId")
     List<Debate> findDebatesForUser(@Param("userKeycloakId") String userKeycloakId);
+
+    Debate findDebateByKialoId(Long kialoId);
 }
 

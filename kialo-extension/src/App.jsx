@@ -2,40 +2,61 @@ import { useState, useEffect } from 'react'
 import { assistantApi, contentApi } from './api';
 
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [debate, setDebate] = useState("");
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [completeDebate, setCompleteDebate] = useState("");
+    const [currentDebateInfo, setCurrentDebateInfo] = useState({ debateId: "", argumentVersions: [] });
+    const [assistantInfo, setAssistantInfo] = useState({});
 
-  useEffect(() => {
+
+    useEffect(() => {
     chrome.storage.local.get(["access_token"], (result) => {
-      if (result.access_token) setIsLoggedIn(true)
-    })
-  }, [])
+        if (result.access_token) setIsLoggedIn(true);
+    });
 
-  const login = () => {
-    chrome.runtime.sendMessage({ action: "login" }, (res) => {
-      if (res?.success) setIsLoggedIn(true);
-      console.log("Login called")
-    })
-  }
-
-  const logout = () => {
-    chrome.storage.local.remove("access_token", () => setIsLoggedIn(false))
-  }
-
-const handleImportDebate = async () => {
-    const rawData = await contentApi.getDebateInfo();
-    const parsedArgs = parseArguments(rawData.arguments, rawData.debateId);
-
-    const debateDto = {
-        topic: rawData.topic,
-        debateId: rawData.debateId,
-        arguments: parsedArgs 
+    const fetchContentData = async () => {
+        try {
+            const info = await contentApi.getDebateInfo();
+            setCurrentDebateInfo(info);
+        } catch (err) {
+            console.error("Chyba při načítání info z content scriptu:", err);
+        }
     };
 
-    setDebate(JSON.stringify(debateDto, null, 2));
-    const apiResult = await assistantApi.createDebate(debateDto);
-    console.log(apiResult);
-};
+    fetchContentData();
+    }, []);
+
+    useEffect(() => {
+            if (currentDebateInfo.debateId) {
+            const fetchAssistantData = async () => {
+                try {
+                    const info = await assistantApi.getDebateInfo(currentDebateInfo.debateId);
+                    setAssistantInfo(info);
+                    console.log("Data z backendu přijata:", info);
+                } catch (err) {
+                    console.error("Chyba při načítání dat z backendu:", err);
+                }
+            };
+            fetchAssistantData();
+        }
+    }, [currentDebateInfo.debateId]);
+
+    const login = () => {
+        chrome.runtime.sendMessage({ action: "login" }, (res) => {
+            if (res?.success) setIsLoggedIn(true);
+            console.log("Login called")
+        })
+    }
+
+    const logout = () => {
+        chrome.storage.local.remove("access_token", () => setIsLoggedIn(false))
+    }
+
+    const handleImportDebate = async () => {
+        const data = await contentApi.getCompleteDebateInfo();
+        setCompleteDebate(JSON.stringify(data, null, 2));
+        const apiResult = await assistantApi.createDebate(data);
+        console.log(apiResult);
+    }
 
   return (
     <div style={{ padding: '1rem' }}>
@@ -44,10 +65,12 @@ const handleImportDebate = async () => {
         <button onClick={login}>Log in through keycloak</button>
       ) : (
         <div>
-          <button onClick={handleImportDebate}>Import debate</button>
-          <p>{debate}</p>
+            {currentDebateInfo.isPresent &&
+                <button onClick={handleImportDebate}>Import debate</button>
+            }  
+            <p>{completeDebate}</p>
           
-          <button onClick={logout} style={{ marginBottom: '10px' }}>Logout</button>
+            <button onClick={logout} style={{ marginBottom: '10px' }}>Logout</button>
           
         </div>
       )}
@@ -56,38 +79,6 @@ const handleImportDebate = async () => {
 }
 
 
-const parseArguments = (rawArguments, debateId) => {
-    const claims = rawArguments.claims;
-    const locations = rawArguments.locations;
-    const parsedArguments = [];
 
-    claims.forEach((claim) => {
-        if(claim.id == debateId + ".0"){
-            return;
-        }
-        const claimsLocation = locations.find(location => location.targetId == claim.id);
-
-        let claimsType;
-        if(claimsLocation.relation == 0){
-            claimsType = "THESIS";
-        } else{
-            claimsLocation.relation == 1 ? claimsType = "PRO" : claimsType = "CON";
-        }
-
-        const argumentId = claim.id.split(".")[1];
-        const parentId = claimsLocation.parentId.split(".")[1];
-
-        const newArgument = {
-            id: argumentId,
-            text: claim.text,
-            type: claimsType, 
-            parent: parentId
-        }
-        parsedArguments.push(newArgument);
-    });
-
-    console.log(parsedArguments);
-    return parsedArguments;
-}
 
 export default App

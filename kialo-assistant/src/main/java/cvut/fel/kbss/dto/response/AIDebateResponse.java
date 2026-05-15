@@ -11,6 +11,7 @@ import java.util.List;
 public class AIDebateResponse {
     private String topic;
     private String thesis;
-    private List<ArgumentResponseDto> arguments = new ArrayList<>();;
+    private List<ArgumentResponseDto> arguments = new ArrayList<>();
     private UserResponseDto owner;
+    private Long debateId;
 }

@@ -19,4 +19,5 @@ public class ArgumentResponseDto {
     private Long parent;
     private UserResponseDto owner;
     private Long debate;
+    private Integer version;
 }
