@@ -88,7 +88,7 @@ public class DebateController {
         String keycloakId = token.getToken().getSubject();
         log.info("User {} is importing AI generated debate: {}", keycloakId, dto.getTopic());
 
-        DebateResponseDto response = debateService.saveAiGeneratedDebate(dto, keycloakId);
+        DebateResponseDto response = debateService.saveGeneratedDebate(dto, keycloakId);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 }

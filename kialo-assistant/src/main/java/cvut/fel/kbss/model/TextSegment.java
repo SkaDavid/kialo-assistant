@@ -19,7 +19,7 @@ public class TextSegment {
     @Enumerated(EnumType.STRING)
     private TextSegmentType type;
 
-    @Column(name = "content")
+    @Column(name = "content", columnDefinition = "TEXT")
     private String content;
 
     @Column(name = "explanation")

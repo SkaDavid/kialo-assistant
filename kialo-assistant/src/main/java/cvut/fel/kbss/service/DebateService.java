@@ -11,6 +11,11 @@ import cvut.fel.kbss.model.*;
 import cvut.fel.kbss.repository.ArgumentRepository;
 import cvut.fel.kbss.repository.DebateRepository;
 import cvut.fel.kbss.repository.UserRepository;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Node;
+import org.jsoup.nodes.TextNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
@@ -125,7 +130,7 @@ public class DebateService {
     }
 
     @Transactional
-    public DebateResponseDto saveAiGeneratedDebate(AIDebateResponse dto, String keycloakId) throws UserNotFoundException {
+    public DebateResponseDto saveGeneratedDebate(AIDebateResponse dto, String keycloakId) throws UserNotFoundException {
         Optional<User> ownerOpt = userRepository.findByKeycloakId(keycloakId);
         if (ownerOpt.isEmpty()) {
             throw new UserNotFoundException("User not found");
@@ -153,6 +158,7 @@ public class DebateService {
         thesis.setParent(null);
         thesis.setOwner(owner);
         thesis.setDebate(savedDebate);
+        thesis.setSegments(this.parseHtmlToSegments(thesisDto.getText()));
 
         Argument savedThesis = argumentRepository.save(thesis);
         idMapping.put(thesisDto.getId(), savedThesis);
@@ -170,6 +176,7 @@ public class DebateService {
                     newArgument.setParent(parentEntity);
                     newArgument.setOwner(owner);
                     newArgument.setDebate(savedDebate);
+                    newArgument.setSegments(parseHtmlToSegments(argumentDto.getText()));
 
                     Argument savedArg = argumentRepository.save(newArgument);
                     idMapping.put(argumentDto.getId(), savedArg);
@@ -179,5 +186,31 @@ public class DebateService {
             remainingArguments.removeAll(toRemove);
         }
         return mapper.toDto(savedDebate);
+    }
+
+    private List<TextSegment> parseHtmlToSegments(String htmlContent) {
+        List<TextSegment> segments = new ArrayList<>();
+        Document document = Jsoup.parse(htmlContent);
+        Element body = document.body();
+        for(Node node : body.childNodes()){
+            if (node instanceof TextNode) {
+                String content = ((TextNode) node).getWholeText();
+                if (!content.isBlank()) {
+                    segments.add(new TextSegment(TextSegmentType.TEXT, content, null, null));
+                }
+            } else if (node instanceof Element element) {
+                if (element.tagName().equals("span") && element.hasAttr("resource")) {
+                    segments.add(new TextSegment(
+                            TextSegmentType.TERM,
+                            element.text(),
+                            null,
+                            element.attr("resource")
+                    ));
+                } else {
+                    segments.add(new TextSegment(TextSegmentType.TEXT, element.text(), null, null));
+                }
+            }
+        }
+        return segments;
     }
 }

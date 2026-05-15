@@ -35,7 +35,7 @@ public class Argument {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name="text")
+    @Column(name="text", columnDefinition = "TEXT")
     private String text;
 
     @ElementCollection
