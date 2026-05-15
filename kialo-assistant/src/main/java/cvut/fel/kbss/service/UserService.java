@@ -2,7 +2,6 @@ package cvut.fel.kbss.service;
 
 import cvut.fel.kbss.dto.Mapper;
 import cvut.fel.kbss.dto.response.UserResponseDto;
-import cvut.fel.kbss.exception.APIkeyNotFoundException;
 import cvut.fel.kbss.exception.UserNotFoundException;
 import cvut.fel.kbss.model.User;
 import cvut.fel.kbss.repository.UserRepository;

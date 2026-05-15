@@ -15,21 +15,15 @@ import cvut.fel.kbss.model.*;
 import cvut.fel.kbss.repository.ArgumentRepository;
 import cvut.fel.kbss.repository.DebateRepository;
 import cvut.fel.kbss.repository.UserRepository;
+import cvut.fel.kbss.util.HtmlParser;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.nodes.Node;
-import org.jsoup.nodes.TextNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class ArgumentService {
@@ -41,9 +35,10 @@ public class ArgumentService {
     private final DebateGenerationClient debateGenerationClient;
     private final ExplanationClient explanationClient;
     private final TermitClient termitClient;
+    private final HtmlParser htmlParser;
 
     @Autowired
-    public ArgumentService(ArgumentRepository argumentRepository, UserRepository userRepository, DebateRepository debateRepository, FallacyClient fallacyClient, Mapper mapper, DebateGenerationClient debateGenerationClient, ExplanationClient explanationClient, TermitClient termitClient){
+    public ArgumentService(ArgumentRepository argumentRepository, UserRepository userRepository, DebateRepository debateRepository, FallacyClient fallacyClient, Mapper mapper, DebateGenerationClient debateGenerationClient, ExplanationClient explanationClient, TermitClient termitClient, HtmlParser htmlParser){
         this.argumentRepository = argumentRepository;
         this.userRepository = userRepository;
         this.debateRepository = debateRepository;
@@ -52,26 +47,15 @@ public class ArgumentService {
         this.debateGenerationClient = debateGenerationClient;
         this.explanationClient = explanationClient;
         this.termitClient = termitClient;
+        this.htmlParser = htmlParser;
     }
 
     @Transactional
     public ArgumentResponseDto createArgument(String text, ArgumentType type, Long parentId, Long debateId, JwtAuthenticationToken token)
             throws UserNotFoundException, DebateNotFoundException, ArgumentNotFoundException, ServiceNotRespondingException {
-        Optional<User> ownerOpt = userRepository.findByKeycloakId(token.getToken().getSubject());
-        Optional<Argument> parentOpt = argumentRepository.findById(parentId);
-        Optional<Debate> debateOpt = debateRepository.findById(debateId);
-        if(ownerOpt.isEmpty()){
-            throw new UserNotFoundException("Owner not found");
-        }
-        if(parentOpt.isEmpty()){
-            throw new ArgumentNotFoundException("Parent not found");
-        }
-        if(debateOpt.isEmpty()){
-            throw new DebateNotFoundException("Debate not found");
-        }
-        Debate debate = debateOpt.get();
-        User owner = ownerOpt.get();
-        Argument parent = parentOpt.get();
+        User owner = userRepository.findByKeycloakId(token.getToken().getSubject()).orElseThrow(() -> new UserNotFoundException("Owner not found"));
+        Argument parent = argumentRepository.findById(parentId).orElseThrow(() -> new ArgumentNotFoundException("Parent not found"));
+        Debate debate = debateRepository.findById(debateId).orElseThrow(() -> new DebateNotFoundException("Debate not found"));
 
         Argument argument = new Argument();
         argument.setDebate(debate);
@@ -79,7 +63,7 @@ public class ArgumentService {
         argument.setParent(parent);
         argument.setType(type);
         argument.setText(text);
-        argument.setSegments(this.parseHtmlToSegments(text));
+        argument.setSegments(htmlParser.parseHtmlToSegments(text));
 
         List<Argument> debateArguments = debate.getArguments();
         debateArguments.add(argument);
@@ -93,16 +77,8 @@ public class ArgumentService {
 
     @Transactional
     public void deleteArgument(Long argumentId, JwtAuthenticationToken token) throws ArgumentNotFoundException, UnauthorizedAccessException, UserNotFoundException, ServiceNotRespondingException {
-        Optional<Argument> argumentOpt = argumentRepository.findById(argumentId);
-        Optional<User> userOpt = userRepository.findByKeycloakId(token.getToken().getSubject());
-        if(argumentOpt.isEmpty()){
-            throw new ArgumentNotFoundException("Argument you wish to delete was not found");
-        }
-        if(userOpt.isEmpty()){
-            throw new UserNotFoundException("User not found");
-        }
-        Argument argument = argumentOpt.get();
-        User user = userOpt.get();
+        Argument argument = argumentRepository.findById(argumentId).orElseThrow(() -> new ArgumentNotFoundException("Argument you wish to delete was not found"));
+        User user = userRepository.findByKeycloakId(token.getToken().getSubject()).orElseThrow(() -> new UserNotFoundException("User not found"));
 
         if(!argument.getOwner().getKeycloakId().equals(user.getKeycloakId())){
             throw new UnauthorizedAccessException("User is not the owner of the argument");
@@ -117,22 +93,15 @@ public class ArgumentService {
     public ArgumentResponseDto updateArgument(long argumentId, String newText, ArgumentType newType, JwtAuthenticationToken token)
             throws ArgumentNotFoundException, UnauthorizedAccessException, UserNotFoundException, ServiceNotRespondingException {
 
-        Optional<Argument> argumentOpt = argumentRepository.findById(argumentId);
-        Optional<User> userOpt = userRepository.findByKeycloakId(token.getToken().getSubject());
-        if(argumentOpt.isEmpty()){
-            throw new ArgumentNotFoundException("Argument not found");
-        }
-        if(userOpt.isEmpty()){
-            throw new UserNotFoundException("User not found");
-        }
-        User user = userOpt.get();
-        Argument argument = argumentOpt.get();
+        Argument argument = argumentRepository.findById(argumentId).orElseThrow(() -> new ArgumentNotFoundException("Argument not found"));
+        User user = userRepository.findByKeycloakId(token.getToken().getSubject()).orElseThrow(() -> new UserNotFoundException("User not found"));
+
         if (!argument.getOwner().getKeycloakId().equals(user.getKeycloakId())) {
             throw new UnauthorizedAccessException("You are not the owner of this argument");
         }
         argument.setText(newText);
         argument.setType(newType);
-        argument.setSegments(this.parseHtmlToSegments(newText));
+        argument.setSegments(htmlParser.parseHtmlToSegments(newText));
 
         long debateId = argument.getDebate().getId();
         termitClient.updateArgumentFile(debateId, argumentId, newText, token.getToken().getTokenValue());
@@ -171,7 +140,7 @@ public class ArgumentService {
             obj.put("parent", arg.getParent());
             obj.put("type", arg.getType());
             obj.put("text", arg.getText());
-            obj.put("segments", this.parseHtmlToSegments(arg.getText()));
+            obj.put("segments", htmlParser.parseHtmlToSegments(arg.getText()));
 
             jsonArray.put(obj);
         }
@@ -180,15 +149,11 @@ public class ArgumentService {
 
     @Transactional
     public ArgumentResponseDto syncWithTermit(long argumentId, String token) throws ArgumentNotFoundException, ServiceNotRespondingException {
-        Optional<Argument> argumentOpt = argumentRepository.findById(argumentId);
-        if(argumentOpt.isEmpty()){
-            throw new ArgumentNotFoundException("Argument with id: " + argumentId + " not found");
-        }
-        Argument argument = argumentOpt.get();
+        Argument argument = argumentRepository.findById(argumentId).orElseThrow(() -> new ArgumentNotFoundException("Argument with id: " + argumentId + " not found"));
         long debateId = argument.getDebate().getId();
 
         String htmlContent = termitClient.getArgumentContent(debateId, argumentId, token);
-        List<TextSegment> segments = parseHtmlToSegments(htmlContent);
+        List<TextSegment> segments = htmlParser.parseHtmlToSegments(htmlContent);
         for(TextSegment segment : segments){
             if(segment.getType().equals(TextSegmentType.TERM)){
                 segment.setExplanation(termitClient.findDefinition(segment.getResource(), token));
@@ -200,43 +165,55 @@ public class ArgumentService {
         return mapper.toDto(argument);
     }
 
-    private List<TextSegment> parseHtmlToSegments(String htmlContent) {
-        List<TextSegment> segments = new ArrayList<>();
-        Document document = Jsoup.parse(htmlContent);
-        Element body = document.body();
-        for(Node node : body.childNodes()){
-            if (node instanceof TextNode) {
-                String content = ((TextNode) node).getWholeText();
-                if (!content.isBlank()) {
-                    segments.add(new TextSegment(TextSegmentType.TEXT, content, null, null));
-                }
-            } else if (node instanceof Element element) {
-                if (element.tagName().equals("span") && element.hasAttr("resource")) {
-                    segments.add(new TextSegment(
-                            TextSegmentType.TERM,
-                            element.text(),
-                            null,
-                            element.attr("resource")
-                    ));
-                } else {
-                    segments.add(new TextSegment(TextSegmentType.TEXT, element.text(), null, null));
+    @Transactional
+    public void saveArgumentTree(List<ArgumentResponseDto> dtos, Debate debate, User owner) {
+        Map<Long, Argument> idMapping = new HashMap<>();
+        List<ArgumentResponseDto> remainingArguments = new ArrayList<>(dtos);
+
+        ArgumentResponseDto thesisDto = remainingArguments.stream()
+                .filter(arg -> "THESIS".equals(arg.getType()))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Thesis not found in generated data"));
+
+        Argument thesis = createArgumentEntity(thesisDto, null, debate, owner);
+        Argument savedThesis = argumentRepository.save(thesis);
+
+        idMapping.put(thesisDto.getId(), savedThesis);
+        remainingArguments.remove(thesisDto);
+
+        while (!remainingArguments.isEmpty()) {
+            List<ArgumentResponseDto> toRemove = new ArrayList<>();
+            for (ArgumentResponseDto dto : remainingArguments) {
+                if (idMapping.containsKey(dto.getParent())) {
+                    Argument parentEntity = idMapping.get(dto.getParent());
+                    Argument newArg = createArgumentEntity(dto, parentEntity, debate, owner);
+
+                    Argument savedArg = argumentRepository.save(newArg);
+                    idMapping.put(dto.getId(), savedArg);
+                    toRemove.add(dto);
                 }
             }
+            remainingArguments.removeAll(toRemove);
         }
-        return segments;
+    }
+
+    private Argument createArgumentEntity(ArgumentResponseDto dto, Argument parent, Debate debate, User owner) {
+        Argument argument = new Argument();
+        argument.setText(dto.getText());
+        argument.setType(ArgumentType.valueOf(dto.getType()));
+        argument.setParent(parent);
+        argument.setOwner(owner);
+        argument.setDebate(debate);
+        argument.setKialoId(dto.getId());
+        argument.setKialoVersion(dto.getVersion());
+        argument.setSegments(htmlParser.parseHtmlToSegments(dto.getText()));
+        return argument;
     }
 
     public ArgumentResponseDto getArgument(Long argumentId, String keyCloakId) throws ArgumentNotFoundException, UserNotFoundException, UnauthorizedAccessException {
-        Optional<Argument> argumentOpt = argumentRepository.findById(argumentId);
-        Optional<User> userOpt = userRepository.findByKeycloakId(keyCloakId);
-        if(argumentOpt.isEmpty()){
-            throw new ArgumentNotFoundException("Argument not found");
-        }
-        if(userOpt.isEmpty()){
-            throw new UserNotFoundException("User not found");
-        }
-        User user = userOpt.get();
-        Argument argument = argumentOpt.get();
+        Argument argument = argumentRepository.findById(argumentId).orElseThrow(() -> new ArgumentNotFoundException("Argument not found"));
+        User user = userRepository.findByKeycloakId(keyCloakId).orElseThrow(() -> new UserNotFoundException("User not found"));
+
         if (!argument.getOwner().getKeycloakId().equals(user.getKeycloakId())) {
             throw new UnauthorizedAccessException("You are not the owner of this argument");
         }
