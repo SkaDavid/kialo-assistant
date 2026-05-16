@@ -93,11 +93,11 @@ public class DebateController {
     }
 
     @GetMapping("/kialo-info/{kialoDebateId}")
-    public ResponseEntity<DebateInfoDto> getDebateInfo(@PathVariable Long kialoDebateId, JwtAuthenticationToken token){
+    public ResponseEntity<DebateInfoDto> getDebateInfo(@PathVariable Long kialoDebateId, JwtAuthenticationToken token) throws ServiceNotRespondingException {
         String keycloakId = token.getToken().getSubject();
         log.info("User {} is checking kialo debate {} status.", keycloakId, kialoDebateId);
 
-        DebateInfoDto dto = debateService.getDebateInfo(kialoDebateId);
+        DebateInfoDto dto = debateService.getDebateInfo(kialoDebateId, token);
 
         return ResponseEntity.status(HttpStatus.OK).body(dto);
     }

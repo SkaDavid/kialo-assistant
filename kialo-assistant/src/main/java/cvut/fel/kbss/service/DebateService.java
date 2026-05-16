@@ -6,6 +6,7 @@ import cvut.fel.kbss.dto.Mapper;
 import cvut.fel.kbss.dto.response.AIDebateResponse;
 import cvut.fel.kbss.dto.response.DebateInfoDto;
 import cvut.fel.kbss.dto.response.DebateResponseDto;
+import cvut.fel.kbss.dto.response.TermDefinitionDto;
 import cvut.fel.kbss.exception.*;
 import cvut.fel.kbss.model.*;
 import cvut.fel.kbss.repository.DebateRepository;
@@ -126,11 +127,12 @@ public class DebateService {
         return mapper.toDto(savedDebate);
     }
 
-    public DebateInfoDto getDebateInfo(Long kialoDebateId) {
+    public DebateInfoDto getDebateInfo(Long kialoDebateId, JwtAuthenticationToken token) throws ServiceNotRespondingException {
         Debate debate = debateRepository.findDebateByKialoId(kialoDebateId);
+        List<TermDefinitionDto> terms = termitClient.getVocabularyTerms(debate.getId(), token.getToken().getTokenValue());
         if(debate != null){
-            return mapper.toDebateInfoDto(debate);
+            return mapper.toDebateInfoDto(debate, terms);
         }
-        return new DebateInfoDto(false, null, null);
+        return new DebateInfoDto(false, null, null, null);
     }
 }

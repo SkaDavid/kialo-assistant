@@ -18,6 +18,7 @@ function App() {
 
             if (contentInfo?.debateId) {
                 const assistInfo = await assistantApi.getDebateInfo(contentInfo.debateId);
+                console.log(assistInfo);
                 setAssistantInfo(assistInfo);
 
                 if (assistInfo?.argumentVersions) {
@@ -95,6 +96,16 @@ function App() {
             ))}
           
             <button onClick={logout} style={{ marginBottom: '10px' }}>Logout</button>
+            <div className="terms">
+                {assistantInfo.terms.map(term => (
+                    <article style={{ border: "2px solid green", marginBottom: "10px", padding: "5px" }} key={assistantInfo.terms.term}>
+                        <p><strong>Term:</strong>{term.term}</p>
+                        <p><strong>Definition:</strong>{term.definition}</p>
+                    </article>
+                ))
+                }
+                
+            </div>
           
         </div>
       )}

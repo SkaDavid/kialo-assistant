@@ -54,10 +54,11 @@ public class Mapper {
         return response;
     }
 
-    public DebateInfoDto toDebateInfoDto(Debate debate){
+    public DebateInfoDto toDebateInfoDto(Debate debate, List<TermDefinitionDto> terms){
         DebateInfoDto dto = new DebateInfoDto();
         dto.setPresent(true);
         dto.setId(debate.getId());
+        dto.setTerms(terms);
         List<ArgumentVersionDto> versions = new ArrayList<>();
         for(Argument argument : debate.getArguments()){
             versions.add(this.toVersionDto(argument));

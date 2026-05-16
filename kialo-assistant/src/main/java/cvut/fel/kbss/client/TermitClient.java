@@ -1,6 +1,8 @@
 package cvut.fel.kbss.client;
 
+import cvut.fel.kbss.dto.response.TermDefinitionDto;
 import cvut.fel.kbss.exception.ServiceNotRespondingException;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.stereotype.Component;
 import java.net.URI;
@@ -8,6 +10,8 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 public class TermitClient {
@@ -112,6 +116,58 @@ public class TermitClient {
             return response.body();
         } catch (Exception e) {
             throw new ServiceNotRespondingException("Failed to fetch content from Termit", e);
+        }
+    }
+
+    public List<TermDefinitionDto> getVocabularyTerms(long debateId, String token) throws ServiceNotRespondingException {
+        String localName = "debate-" + debateId;
+        String url = "http://termit-server:8080/termit/rest/vocabularies/" + localName + "/terms";
+
+        System.out.println("I came before the request succesfully");
+        try (HttpClient client = HttpClient.newHttpClient()) {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(url))
+                    .header("Authorization", "Bearer " + token)
+                    .header("Accept", "application/json")
+                    .GET()
+                    .timeout(Duration.ofSeconds(30))
+                    .build();
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() != 200) {
+                throw new ServiceNotRespondingException("Termit error: " + response.statusCode());
+            }
+
+            JSONArray termsArray = new JSONArray(response.body());
+            List<TermDefinitionDto> result = new ArrayList<>();
+
+            for (int i = 0; i < termsArray.length(); i++) {
+                JSONObject termJson = termsArray.getJSONObject(i);
+                TermDefinitionDto dto = new TermDefinitionDto();
+
+                if (termJson.has("definition")) {
+                    JSONObject defObj = termJson.optJSONObject("definition");
+                    if (defObj != null) {
+                        dto.setDefinition(defObj.optString("en", "No definition"));
+                    } else {
+                        dto.setDefinition(termJson.optString("definition", "No definition"));
+                    }
+                }
+
+                if (termJson.has("label")) {
+                    JSONObject labelObj = termJson.optJSONObject("label");
+                    if (labelObj != null) {
+                        dto.setTerm(labelObj.optString("en", "No label"));
+                    } else {
+                        dto.setTerm(termJson.optString("label", "No label"));
+                    }
+                }
+
+                result.add(dto);
+            }
+            return result;
+        } catch (Exception e) {
+            throw new ServiceNotRespondingException("Failed to fetch terms from Termit", e);
         }
     }
 
