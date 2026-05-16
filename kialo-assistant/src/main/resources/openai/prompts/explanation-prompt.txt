@@ -1,0 +1,3 @@
+A fallacy detector labeled this text: "%s" as a fallacy of this type: "%s".
+Determine whether the fallacy detector is correct and briefly explain why.
+Do not include any additional text or information.

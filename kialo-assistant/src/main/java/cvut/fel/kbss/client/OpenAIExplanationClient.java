@@ -6,12 +6,15 @@ import cvut.fel.kbss.exception.ServiceNotRespondingException;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 
 
@@ -20,6 +23,12 @@ public class OpenAIExplanationClient implements ExplanationClient{
     @Value("${openai.key}")
     String secret_key;
 
+    @Value("classpath:openai/prompts/explanation-prompt.txt")
+    private Resource explanationPromptResource;
+
+    @Value("classpath:openai/schemas/explanation-schema.json")
+    private Resource explanationSchemaResource;
+
 
     @Override
     public ValidationResponse explainFallacy(String label, String text) throws APIkeyNotFoundException, ServiceNotRespondingException {
@@ -27,7 +36,7 @@ public class OpenAIExplanationClient implements ExplanationClient{
             throw new APIkeyNotFoundException("OpenAI Api's key was not found");
         }
 
-        String schema = createSchema();
+        String schema = loadResourceToString(explanationSchemaResource);
         String prompt = createPrompt(label, text);
         String requestBody = createRequestBody(prompt, schema);
         HttpResponse<String> response = sendPostRequest(requestBody);
@@ -98,31 +107,16 @@ public class OpenAIExplanationClient implements ExplanationClient{
         return body.toString();
     }
 
-    private String createPrompt(String label, String text) {
-        return """
-            A fallacy detector labeled this text: "%s" as a fallacy of this type: "%s".
-            Determine whether the fallacy detector is correct and briefly explain why.
-            Do not include any additional text or information.
-            """.formatted(text, label);
+    private String createPrompt(String label, String text) throws ServiceNotRespondingException {
+        String prompt = loadResourceToString(explanationPromptResource);
+        return prompt.formatted(text, label);
     }
 
-    private String createSchema(){
-        return """
-                {
-                  "type": "object",
-                  "required": ["is_fallacy", "explanation"],
-                  "properties": {
-                    "is_fallacy": {
-                      "type": "boolean",
-                      "description": "True, if text does contain a fallacy."
-                    },
-                    "explanation": {
-                      "type": "string",
-                      "description": "A brief and logical explanation of why it is a fallacy or why it is not a fallacy."
-                    }
-                  },
-                  "additionalProperties": false
-                }
-                """;
+    private String loadResourceToString(Resource resource) throws ServiceNotRespondingException {
+        try {
+            return resource.getContentAsString(StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw new ServiceNotRespondingException("Failed to load template resource: " + resource.getFilename(), e);
+        }
     }
 }

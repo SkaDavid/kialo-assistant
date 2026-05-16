@@ -1,0 +1,6 @@
+Create a debate of two supporting arguments and two opposing arguments regarding this topic: "%s".
+Return a JSON object with two parts:
+"pro": an array of two supporting arguments.
+"con": an array of two opposing arguments.
+An arguments is always a string.
+Do not include any additional text or explanation.

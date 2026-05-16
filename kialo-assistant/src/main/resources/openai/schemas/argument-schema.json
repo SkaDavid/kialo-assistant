@@ -1,0 +1,8 @@
+{
+  "type": "object",
+  "required": ["argument"],
+  "properties": {
+    "argument": { "type": "string" }
+  },
+  "additionalProperties": false
+}

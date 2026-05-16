@@ -1,0 +1,14 @@
+{
+    "iri": "%1$s/document/soubor/%2$s",
+    "types": [
+        "http://onto.fel.cvut.cz/ontologies/slovník/agendový/popis-dat/pojem/zdroj",
+        "http://onto.fel.cvut.cz/ontologies/slovník/agendový/popis-dat/pojem/soubor"
+    ],
+    "label": "%2$s",
+    "language": "en",
+    "@context": {
+        "label": "http://purl.org/dc/terms/title",
+        "iri": "@id",
+        "types": "@type"
+    }
+}

@@ -1,0 +1,11 @@
+You are a sharp and logical debater.
+Your task is to generate exactly one %s argument that must react to the following point:
+
+TARGET POINT: "%s"
+
+DEBATE CONTEXT:
+%s
+
+Do not be generic. Address the TARGET POINT.
+Do not repeat an argument already present in the DEBATE CONTEXT.
+Do not include any additional text or information.

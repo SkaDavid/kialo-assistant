@@ -1,0 +1,15 @@
+{
+  "type": "object",
+  "required": ["is_fallacy", "explanation"],
+  "properties": {
+    "is_fallacy": {
+      "type": "boolean",
+      "description": "True, if text does contain a fallacy."
+    },
+    "explanation": {
+      "type": "string",
+      "description": "A brief and logical explanation of why it is a fallacy or why it is not a fallacy."
+    }
+  },
+  "additionalProperties": false
+}
