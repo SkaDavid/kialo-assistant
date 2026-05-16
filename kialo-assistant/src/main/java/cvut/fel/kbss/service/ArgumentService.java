@@ -84,6 +84,9 @@ public class ArgumentService {
         if(!argument.getOwner().getKeycloakId().equals(user.getKeycloakId())){
             throw new UnauthorizedAccessException("User is not the owner of the argument");
         }
+        if(argument.getType().equals(ArgumentType.THESIS)){
+            throw new UnauthorizedAccessException("It is not possible to delete Thesis");
+        }
 
         long debateId = argument.getDebate().getId();
         termitClient.deleteArgumentFile(debateId, argumentId, token.getToken().getTokenValue());
