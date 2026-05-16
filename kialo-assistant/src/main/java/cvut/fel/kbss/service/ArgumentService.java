@@ -176,7 +176,7 @@ public class ArgumentService {
         List<TextSegment> segments = htmlParser.parseHtmlToSegments(htmlContent);
         for(TextSegment segment : segments){
             if(segment.getType().equals(TextSegmentType.TERM)){
-                segment.setExplanation(termitClient.findDefinition(segment.getResource(), token));
+                segment.setExplanation(termitClient.getDefinition(segment.getResource(), token));
             }
         }
         argument.setSegments(segments);

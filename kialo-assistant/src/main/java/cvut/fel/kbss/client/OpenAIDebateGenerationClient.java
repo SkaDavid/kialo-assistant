@@ -116,10 +116,6 @@ public class OpenAIDebateGenerationClient implements DebateGenerationClient {
         }
     }
 
-
-
-
-
     private AIDebateResponse parseDebateResponse(HttpResponse<String> response, String thesisText) {
         JSONObject json = new JSONObject(response.body());
 
