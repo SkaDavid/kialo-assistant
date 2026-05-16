@@ -1,5 +1,12 @@
 const ASSISTANT_URL = "http://localhost:8082";
+const KIALO_URL = "https://www.kialo.com/api/v1/";
 
+export const getToken = () => {
+    const name = "_xsrf";
+    const csrfCookie = document.cookie.match(new RegExp(name + "=([^;]+)"))?.[1];
+    const csrfToken = csrfCookie ? csrfCookie : null;
+    return csrfToken;
+}
 
 const assistantRequest = async (endpoint, options) => {
     const token = await chrome.storage.local.get("access_token");
@@ -24,7 +31,7 @@ const contentRequest = (action, payload = {}) => {
                 return reject(new Error("Cant find active tab"));
             }
 
-            chrome.tabs.sendMessage(activeTab.id, { action, ...payload }, (response) => {
+            chrome.tabs.sendMessage(activeTab.id, { action, payload }, (response) => {
                 if (chrome.runtime.lastError) {
                     return reject(new Error("Tab is not reponding"));
                 }
@@ -36,6 +43,25 @@ const contentRequest = (action, payload = {}) => {
         });
     });
 };
+
+const kialoRequest = async (endpoint, options) => {
+    const token = getToken();
+    const headers = {
+        "Content-Type": "application/json",
+        "X-Csrftoken": token,
+    }
+
+    const response = await fetch(`${KIALO_URL}${endpoint}`, {headers, ...options});
+    if(response.ok){
+        return response.json();
+    } else{
+        throw new Error(`Request failed with status ${response.status}`);
+    }
+}
+
+export const kialoApi = {
+    postArgument: (dto) => kialoRequest(`discussiongraph`, {"method": "POST", "credentials": "include", "body": JSON.stringify(dto)})
+}
 
 export const assistantApi = {
     createDebate: (dto) => assistantRequest(`/debate/import-debate`, { "method": "POST", "body": JSON.stringify(dto)}),
@@ -51,5 +77,9 @@ export const contentApi = {
     getDebateInfo: async () => {
         const result = await contentRequest("getDebateInfo");
         return result.debateInfo;
+    },
+    postArgument: async (dto) => {
+        const result = await contentRequest("postArgument", dto);
+        return result.argument;
     }
 };

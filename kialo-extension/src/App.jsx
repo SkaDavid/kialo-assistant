@@ -83,6 +83,25 @@ function App() {
         console.log(apiResult);
     }
 
+    const handleSendToKialo = async (argument) => {
+        try {
+            const parentMapping = assistantInfo.argumentVersions.find(item => item.id == argument.parent);
+            if (!parentMapping || !parentMapping.kialoId) {
+                alert("This arguments parent is not in kialo yet");
+                return;
+            }
+            const response = await contentApi.postArgument({ 
+                argumentText: argument.text,
+                argumentType: argument.type,
+                parentId: parentMapping.kialoId
+            });
+            
+            console.log("Kialo response:", response)
+        } catch(error) {
+            console.error("Odesílání do Kiala selhalo:", error);
+        }
+    }
+
   return (
     <div style={{ padding: '1rem' }}>
       <h1>Kialo Assistant</h1>
@@ -100,6 +119,8 @@ function App() {
                     <p><strong>ID:</strong> {argument.id}</p>
                     <p><strong>Text:</strong> {argument.text}</p>
                     <p><strong>Type:</strong> {argument.type}</p>
+                    <p>parent ID: {argument.parent}</p>
+                    <button onClick={() => handleSendToKialo(argument)}>Send to kialo</button>
                 </article>
             ))}
 
@@ -124,7 +145,7 @@ function App() {
             <button onClick={logout} style={{ marginBottom: '10px' }}>Logout</button>
             <div className="terms">
                 {assistantInfo.terms ? assistantInfo.terms.map(term => (
-                    <article style={{ border: "2px solid green", marginBottom: "10px", padding: "5px" }} key={assistantInfo.terms.term}>
+                    <article style={{ border: "2px solid green", marginBottom: "10px", padding: "5px" }} key={terms.term}>
                         <p><strong>Term:</strong>{term.term}</p>
                         <p><strong>Definition:</strong>{term.definition}</p>
                     </article>

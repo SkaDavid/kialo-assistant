@@ -1,3 +1,4 @@
+import { kialoApi, getToken } from "./api";
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === "getDebate") {
@@ -5,6 +6,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         return true; 
     } else if (request.action === "getDebateInfo") {
         handleGetDebateInfo(sendResponse);
+        return true;
+    } else if (request.action === "postArgument"){
+        handlePostArgument(request.payload, sendResponse);
         return true;
     }
 })
@@ -29,6 +33,22 @@ const handleGetDebateInfo = async (sendResponse) => {
     }
 }
 
+const handlePostArgument = async (data, sendResponse) => {
+    try{
+        const body = {
+            "parentLocationPath": findLocations(data.parentId),
+            "relation": data.argumentType === "PRO" ? 1 : -1,
+            "text": data.argumentText,
+            "isSuggestion": false,
+            "markdownVersion": 1
+        }
+        const argument = await kialoApi.postArgument(body);
+        sendResponse({ argument: argument });
+    } catch (err) {
+        sendResponse({ error: err.message });
+    }
+}
+
 
 const getDebateInfo = async () => {
     return {
@@ -43,6 +63,7 @@ const getDebate = async () => {
     const topic = getTopic();
 
     /* volani kiala, viz nize */ 
+    /* nacacheuj si to sem nekam */
     const debateArguments = getOfflineDebate();
 
     return {
@@ -54,25 +75,44 @@ const getDebate = async () => {
 
 const getArgumentVersions = () => {
     /* kialo request nize */
+    /* nacacheuj si to sem nekam */
     const claims = getOfflineDebate().claims;
     return claims.map(claim => ({id: claim.id.split(".")[1], version: claim.version}))
 }
 
 const getDebateId = () => {
-    return window.location.href.substring(window.location.href.lastIndexOf('/') + 1);
+    return window.location.href.substring(window.location.href.lastIndexOf('/') + 1, window.location.href.lastIndexOf('/') + 6);
 }
 
 const getTopic = () => {
     return document.querySelector("h1.topbar-title__discussion-title").textContent;
 }
 
-const getToken = () => {
-    const name = "_xsrf";
-    const csrfCookie = document.cookie.match(new RegExp(name + "=([^;]+)"))?.[1];
-    const csrfToken = csrfCookie ? csrfCookie : null;
-    return csrfToken;
-}
 
+
+const findLocations = (parentClaimsId) => {
+    /* cache */
+    const locations = getOfflineDebate().locations;
+    console.log(locations);
+    let result = [];
+    
+    const parentLocation = locations.find(location => location.targetId.split(".")[1] == parentClaimsId);
+    result.push(parentLocation.id);
+    let currentId = parentLocation.parentId;
+
+    console.log(result);
+    console.log(currentId);
+    console.log(parentLocation)
+    
+    while(currentId != null){
+        const currentLocation = locations.find(location => location.targetId == currentId);
+        console.log("currentLocation:")
+        console.log(currentLocation)
+        result.push(currentLocation.id);
+        currentId = currentLocation.parentId;
+    }
+    return result.reverse();;
+}
 
 
 
@@ -336,21 +376,21 @@ const getOfflineDebate = () => {
             "id": "72645.39",
             "authorIdentityId": "68b49242346b6dff0e533982",
             "created": 1758458115457,
-            "version": 1,
+            "version": 4,
             "text": "Existují spekulace, že referendum bylo zfalšované. Např. v Sevastopolu podle výsledků referenda muselo hlasovat o 233 procent více lidí, než kolik jich ve městě žilo rok před referendem. zdroj - [ct24.ceskatelevize.cz](https://ct24.ceskatelevize.cz/clanek/svet/krym-vyhlasil-samostatnost-bylo-ale-referendum-v-poradku-328088)"
         },
         {
             "id": "72645.41",
             "authorIdentityId": "68b49242346b6dff0e533982",
             "created": 1758458236074,
-            "version": 1,
+            "version": 3,
             "text": "Podle Ruské televize Russia-24 se referenda zúčastnili zahraniční pozorovatelé z 21 států, včetně tří českých pozorovatelů \\(Milan Šarapatka, Stanislav Berkovec a Miloslav Soušek\\). Např. Soušek prohlásil, že \"lidé chodí v klidu, jsou rádi a všechno je dobré\". Zdroj - [cs.wikipedia.org](https://cs.wikipedia.org/wiki/Krymsk%C3%A9_referendum_\\(2014\\))"
         },
         {
             "id": "72645.43",
             "authorIdentityId": "68b49242346b6dff0e533982",
             "created": 1758458640865,
-            "version": 1,
+            "version": 2,
             "text": "Rusko reagovalo na hrozbu rozšiřování NATO směrem k ruským hranicím."
         },
         {
@@ -383,15 +423,21 @@ const getOfflineDebate = () => {
             "version": 2,
             "discussionLinkTo": "74050.47",
             "text": "Překročení mezinárodně uznaných hranic Ukrajiny ruskou armádou je porušením státní suverenity, která je zakotvena v Chartě OSN. Rusko jednalo bez souhlasu ukrajinské vlády a bez mandátu OSN. zdroj - [Charta osn, article 2.4.](https://www.un.org/en/about-us/un-charter/full-text)"
-        }
-        ,
+        },/* ,
         {
             "id": "72645.60",
             "authorIdentityId": "68b49242346b6dff0e533982",
             "created": 1768227960554,
             "version": 1,
             "text": "miluju nové texty, opravdu moc."
-        } 
+        } */
+        {
+            "id": "72645.62",
+            "authorIdentityId": "68b49242346b6dff0e533982",
+            "created": 1768227960554,
+            "version": 1,
+            "text": "miluju nové texty, opravdu moc, moc, moc, moc."
+        }  
     ],
     "locations": [
         {
@@ -658,6 +704,16 @@ const getOfflineDebate = () => {
         {
             "id": "72645.59",
             "targetId": "72645.60",
+            "version": 1,
+            "isOrigin": true,
+            "authorIdentityId": "68b49242346b6dff0e533982",
+            "created": 1768227960563,
+            "parentId": "72645.47",
+            "relation": 1
+        },
+        {
+            "id": "72645.63",
+            "targetId": "72645.62",
             "version": 1,
             "isOrigin": true,
             "authorIdentityId": "68b49242346b6dff0e533982",
