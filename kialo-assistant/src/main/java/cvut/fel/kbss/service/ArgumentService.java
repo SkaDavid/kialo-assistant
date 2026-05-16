@@ -197,6 +197,7 @@ public class ArgumentService {
 
         Argument thesis = createArgumentEntity(thesisDto, null, debate, owner);
         Argument savedThesis = argumentRepository.save(thesis);
+        termitClient.createArgumentFile(savedThesis.getText(), savedThesis.getDebate().getId(), savedThesis.getId(), token.getToken().getTokenValue());
 
         idMapping.put(thesisDto.getId(), savedThesis);
         remainingArguments.remove(thesisDto);
