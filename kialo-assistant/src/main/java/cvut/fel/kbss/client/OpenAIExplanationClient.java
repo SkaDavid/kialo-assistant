@@ -20,6 +20,8 @@ import java.time.Duration;
 
 @Component
 public class OpenAIExplanationClient implements ExplanationClient{
+    private static final String OPENAI_URL = "https://api.openai.com/v1/responses";
+
     @Value("${openai.key}")
     String secret_key;
 
@@ -68,7 +70,7 @@ public class OpenAIExplanationClient implements ExplanationClient{
     private HttpResponse<String> sendPostRequest(String requestBody) throws ServiceNotRespondingException {
         try (HttpClient client = HttpClient.newHttpClient()) {
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create("https://api.openai.com/v1/responses"))
+                    .uri(URI.create(OPENAI_URL))
                     .header("Content-Type", "application/json")
                     .header("Authorization", "Bearer " + secret_key)
                     .POST(HttpRequest.BodyPublishers.ofString(requestBody))

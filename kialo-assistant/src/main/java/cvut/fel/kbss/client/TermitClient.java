@@ -20,6 +20,7 @@ import java.util.List;
 
 @Component
 public class TermitClient {
+    private static final String TERMIT_URL = "http://termit-server:8080/termit/rest";
 
     @Value("classpath:termit/dictionary-body.jsonld")
     private Resource dictionaryBodyResource;
@@ -33,7 +34,7 @@ public class TermitClient {
 
     public void createDictionary(String topic, long debateId, String token) throws ServiceNotRespondingException {
         String body = createDictionaryBody(topic, debateId);
-        String url = "http://termit-server:8080/termit/rest/vocabularies";
+        String url = TERMIT_URL + "/vocabularies";
         executeRequest(url, "POST", body, "application/ld+json", null, token);
     }
 
@@ -43,12 +44,12 @@ public class TermitClient {
         String fileNamespace = vocabIri + "/document/soubor/";
 
         String body = createFileBody(vocabIri, localName);
-        String createUrl = "http://termit-server:8080/termit/rest/resources/document/files?namespace="
+        String createUrl = TERMIT_URL + "/resources/document/files?namespace="
                 + java.net.URLEncoder.encode(vocabIri + "/", java.nio.charset.StandardCharsets.UTF_8);
 
         HttpResponse<String> response = executeRequest(createUrl, "POST", body, "application/json+ld", null, token);
         if(response.statusCode() == 200 || response.statusCode() == 201){
-            String uploadUrl = "http://termit-server:8080/termit/rest/resources/" + localName + "/content?namespace="
+            String uploadUrl = TERMIT_URL + "/resources/" + localName + "/content?namespace="
                     + java.net.URLEncoder.encode(fileNamespace, java.nio.charset.StandardCharsets.UTF_8);
 
             String boundary = "JavaHttpClientBoundary" + System.currentTimeMillis();
@@ -69,7 +70,7 @@ public class TermitClient {
         String localName = debateId + "-" + argumentId + ".html";
         String fileNamespace = vocabIri + "/document/soubor/";
 
-        String url = "http://termit-server:8080/termit/rest/resources/" + localName + "/content?namespace="
+        String url = TERMIT_URL + "/resources/" + localName + "/content?namespace="
                 + java.net.URLEncoder.encode(fileNamespace, java.nio.charset.StandardCharsets.UTF_8);
 
         HttpResponse<String> response = executeRequest(url, "GET", null, null, "text/html", token);
@@ -78,7 +79,7 @@ public class TermitClient {
 
     public List<TermDefinitionDto> getVocabularyTerms(long debateId, String token) throws ServiceNotRespondingException {
         String localName = "debate-" + debateId;
-        String url = "http://termit-server:8080/termit/rest/vocabularies/" + localName + "/terms";
+        String url =  TERMIT_URL + "/vocabularies/" + localName + "/terms";
 
         HttpResponse<String> response = executeRequest(url, "GET", null, null, "application/json", token);
 
@@ -114,7 +115,7 @@ public class TermitClient {
         String localName = resource.substring(resource.lastIndexOf("/") + 1);
         String namespace = resource.substring(0, resource.lastIndexOf("/") + 1);
 
-        String url = "http://termit-server:8080/termit/rest/terms/" + localName
+        String url = TERMIT_URL + "/terms/" + localName
                 + "?namespace=" + java.net.URLEncoder.encode(namespace, java.nio.charset.StandardCharsets.UTF_8);
 
         HttpResponse<String> response = executeRequest(url, "GET", null, null, "application/json", token);
@@ -128,11 +129,11 @@ public class TermitClient {
 
         String fileNamespace = vocabIri + "/document/soubor/";
 
-        String url = "http://termit-server:8080/termit/rest/resources/" + resourceLocalName
+        String url = TERMIT_URL +"/resources/" + resourceLocalName
                 + "/files/" + fileName
                 + "?namespace=" + java.net.URLEncoder.encode(fileNamespace, java.nio.charset.StandardCharsets.UTF_8);
 
-        HttpResponse<String> response = executeRequest(url, "DELETE", null, null, null, token);
+        executeRequest(url, "DELETE", null, null, null, token);
     }
 
     public void updateArgumentFile(long debateId, long argumentId, String newText, String token) throws ServiceNotRespondingException {
@@ -140,7 +141,7 @@ public class TermitClient {
         String localName = debateId + "-" + argumentId + ".html";
         String fileNamespace = vocabIri + "/document/soubor/";
 
-        String url = "http://termit-server:8080/termit/rest/resources/" + localName + "/content?namespace="
+        String url = TERMIT_URL + "/resources/" + localName + "/content?namespace="
                 + java.net.URLEncoder.encode(fileNamespace, java.nio.charset.StandardCharsets.UTF_8);
         String boundary = "JavaHttpClientBoundary" + System.currentTimeMillis();
         String htmlContent = "<html><body>" + newText + "</body></html>";
