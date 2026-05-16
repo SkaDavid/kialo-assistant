@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface DebateRepository extends JpaRepository<Debate, Long> {
@@ -16,6 +17,6 @@ public interface DebateRepository extends JpaRepository<Debate, Long> {
     @Query("SELECT d FROM Debate d WHERE d.visibility = 'PUBLIC' OR d.owner.keycloakId = :userKeycloakId")
     List<Debate> findDebatesForUser(@Param("userKeycloakId") String userKeycloakId);
 
-    Debate findDebateByKialoId(Long kialoId);
+    Optional<Debate> findDebateByKialoId(Long kialoId);
 }
 

@@ -97,13 +97,14 @@ function App() {
           
             <button onClick={logout} style={{ marginBottom: '10px' }}>Logout</button>
             <div className="terms">
-                {assistantInfo.terms.map(term => (
+                {assistantInfo.terms ? assistantInfo.terms.map(term => (
                     <article style={{ border: "2px solid green", marginBottom: "10px", padding: "5px" }} key={assistantInfo.terms.term}>
                         <p><strong>Term:</strong>{term.term}</p>
                         <p><strong>Definition:</strong>{term.definition}</p>
                     </article>
                 ))
-                }
+                :
+                <></>}
                 
             </div>
           

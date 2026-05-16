@@ -27,6 +27,7 @@ public class Mapper {
                     .collect(Collectors.toList())
             );
         }
+        response.setFallacyCheck(argument.getFallacyCheck() != null ? argument.getFallacyCheck() : null);
         return response;
     }
 

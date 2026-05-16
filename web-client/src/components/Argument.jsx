@@ -18,7 +18,7 @@ const Argument = ({ arg, activePath, currentUser, currentAction, handlers }) => 
         
         <div className="actions">
           <button onClick={(e) => handlers.onOpenReply(e, arg.id)}>React</button>
-          <button onClick={(e) => handlers.onFallacyTest(e, arg.text)}>Check for fallacy</button>
+          <button onClick={(e) => handlers.onFallacyTest(e, arg.text, arg.id)}>Check for fallacy</button>
           {currentUser === arg.owner.username && (
             <>
               <button onClick={(e) => handlers.onDelete(e, arg.id)}>Delete</button>

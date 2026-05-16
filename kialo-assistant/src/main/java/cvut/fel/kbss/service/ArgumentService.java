@@ -63,6 +63,7 @@ public class ArgumentService {
         argument.setParent(parent);
         argument.setType(type);
         argument.setText(text);
+        argument.setFallacyCheck(new FallacyCheck());
         argument.setSegments(htmlParser.parseHtmlToSegments(text));
 
         List<Argument> debateArguments = debate.getArguments();
@@ -99,9 +100,13 @@ public class ArgumentService {
         if (!argument.getOwner().getKeycloakId().equals(user.getKeycloakId())) {
             throw new UnauthorizedAccessException("You are not the owner of this argument");
         }
+        if(argument.getText().equals(newText) && argument.getType().equals(newType)){
+            return mapper.toDto(argument);
+        }
         argument.setText(newText);
         argument.setType(newType);
         argument.setSegments(htmlParser.parseHtmlToSegments(newText));
+        argument.setFallacyCheck(new FallacyCheck());
 
         long debateId = argument.getDebate().getId();
         termitClient.updateArgumentFile(debateId, argumentId, newText, token.getToken().getTokenValue());
@@ -109,15 +114,27 @@ public class ArgumentService {
         return mapper.toDto(argument);
     }
 
-    public FallacyResponseDto testFallacy(String text) throws ServiceNotRespondingException, APIkeyNotFoundException {
+    @Transactional
+    public FallacyResponseDto testFallacy(String text, Long argumentId) throws ServiceNotRespondingException, APIkeyNotFoundException, ArgumentNotFoundException {
         FallacyResponseDto fallacyTest = fallacyClient.testFallacy(text);
+        Argument argument = argumentRepository.findById(argumentId).orElseThrow(() -> new ArgumentNotFoundException("Argument not found with id: " + argumentId));
         if(fallacyTest.getScore() > 0.75){
             ValidationResponse validation = explanationClient.explainFallacy(fallacyTest.getLabel(), text);
             fallacyTest.setFallacy(validation.isFallacy());
             fallacyTest.setExplanation(validation.getExplanation());
+
+            FallacyCheck fallacyCheck = argument.getFallacyCheck();
+            fallacyCheck.setFallacyResult(FallacyResult.FALLACY);
+            fallacyCheck.setExplanation(validation.getExplanation());
+            fallacyCheck.setScore(fallacyTest.getScore());
+            fallacyCheck.setFallacy(fallacyTest.getExplanation());
         } else {
             fallacyTest.setExplanation("No fallacy detected");
             fallacyTest.setFallacy(false);
+
+            FallacyCheck fallacyCheck = argument.getFallacyCheck();
+            fallacyCheck.setFallacyResult(FallacyResult.CLEAN);
+            fallacyCheck.setScore(fallacyTest.getScore());
         }
         return fallacyTest;
     }
@@ -208,9 +225,12 @@ public class ArgumentService {
         argument.setKialoId(dto.getId());
         argument.setKialoVersion(dto.getVersion());
         argument.setSegments(htmlParser.parseHtmlToSegments(dto.getText()));
+        argument.setFallacyCheck(new FallacyCheck());
         return argument;
     }
 
+
+    @Transactional
     public ArgumentResponseDto getArgument(Long argumentId, String keyCloakId) throws ArgumentNotFoundException, UserNotFoundException, UnauthorizedAccessException {
         Argument argument = argumentRepository.findById(argumentId).orElseThrow(() -> new ArgumentNotFoundException("Argument not found"));
         User user = userRepository.findByKeycloakId(keyCloakId).orElseThrow(() -> new UserNotFoundException("User not found"));

@@ -128,11 +128,12 @@ public class DebateService {
     }
 
     public DebateInfoDto getDebateInfo(Long kialoDebateId, JwtAuthenticationToken token) throws ServiceNotRespondingException {
-        Debate debate = debateRepository.findDebateByKialoId(kialoDebateId);
-        List<TermDefinitionDto> terms = termitClient.getVocabularyTerms(debate.getId(), token.getToken().getTokenValue());
-        if(debate != null){
-            return mapper.toDebateInfoDto(debate, terms);
+        Optional<Debate> debateOpt = debateRepository.findDebateByKialoId(kialoDebateId);
+        if(debateOpt.isEmpty()){
+            return new DebateInfoDto(false, null, null, null);
         }
-        return new DebateInfoDto(false, null, null, null);
+        Debate debate = debateOpt.get();
+        List<TermDefinitionDto> terms = termitClient.getVocabularyTerms(debate.getId(), token.getToken().getTokenValue());
+        return mapper.toDebateInfoDto(debate, terms);
     }
 }

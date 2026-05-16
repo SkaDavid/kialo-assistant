@@ -69,11 +69,11 @@ public class ArgumentController {
     }
 
     @PostMapping("/fallacy")
-    public ResponseEntity<FallacyResponseDto> testFallacy(@RequestBody FallacyRequestDto dto, JwtAuthenticationToken token) throws ServiceNotRespondingException, APIkeyNotFoundException {
+    public ResponseEntity<FallacyResponseDto> testFallacy(@RequestBody FallacyRequestDto dto, JwtAuthenticationToken token) throws ServiceNotRespondingException, APIkeyNotFoundException, ArgumentNotFoundException {
         String keycloakId = token.getToken().getSubject();
         log.info("User {} is checking for fallacy with this text: {}", keycloakId, dto.getText());
 
-        FallacyResponseDto fallacyResponse = argumentService.testFallacy(dto.getText());
+        FallacyResponseDto fallacyResponse = argumentService.testFallacy(dto.getText(), dto.getArgumentId());
         return ResponseEntity.status(HttpStatus.OK).body(fallacyResponse);
     }
 

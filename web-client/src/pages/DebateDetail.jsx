@@ -17,6 +17,7 @@ const DebateDetail = () => {
   const fetchData = async () => {
     const data = await api.getArgument(id);
     setDebate(data);
+    console.log(data);
   };
 
   useEffect(() => { fetchData(); }, [id]);
@@ -60,9 +61,9 @@ const DebateDetail = () => {
                     },
                     setReplyArgId: setReplyArgId, 
                     setUpdateArgId: setUpdateArgId,
-                    onFallacyTest: async (e, text) => {
+                    onFallacyTest: async (e, text, argumentId) => {
                       e.stopPropagation();
-                      const data = await api.testFallacy(text);
+                      const data = await api.testFallacy({ text: text, argumentId: argumentId });
                       if(data){
                         setArgumentFallacy({
                           text: text,
@@ -107,9 +108,9 @@ const DebateDetail = () => {
                     },
                     setReplyArgId: setReplyArgId, 
                     setUpdateArgId: setUpdateArgId,
-                    onFallacyTest: async (e, text) => {
+                    onFallacyTest: async (e, text, argumentId) => {
                       e.stopPropagation();
-                      const data = await api.testFallacy(text);
+                      const data = await api.testFallacy({ text: text, argumentId: argumentId });
                       if(data){
                         setArgumentFallacy({
                           text: text,

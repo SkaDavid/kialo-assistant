@@ -1,5 +1,6 @@
 package cvut.fel.kbss.dto.response;
 
+import cvut.fel.kbss.model.FallacyCheck;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,4 +21,5 @@ public class ArgumentResponseDto {
     private UserResponseDto owner;
     private Long debate;
     private Integer version;
+    private FallacyCheck fallacyCheck;
 }

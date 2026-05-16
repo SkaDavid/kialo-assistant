@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.Cascade;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -68,4 +69,7 @@ public class Argument {
 
     @Column(name="kialo_version")
     private Integer kialoVersion;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    private FallacyCheck fallacyCheck;
 }
