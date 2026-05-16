@@ -55,7 +55,7 @@ const getDebate = async () => {
 const getArgumentVersions = () => {
     /* kialo request nize */
     const claims = getOfflineDebate().claims;
-    return claims.map(claim => ({id: claim.id, version: claim.version}))
+    return claims.map(claim => ({id: claim.id.split(".")[1], version: claim.version}))
 }
 
 const getDebateId = () => {
@@ -364,14 +364,16 @@ const getOfflineDebate = () => {
             "id": "72645.47",
             "authorIdentityId": "68b49242346b6dff0e533982",
             "created": 1758459155768,
-            "version": 1,
+/*             "version": 2, */
+            "version": 3,
             "text": "Překročení mezinárodně uznaných hranic Ukrajiny ruskou armádou je porušením státní suverenity, která je zakotvena v Chartě OSN. Rusko jednalo bez souhlasu ukrajinské vlády a bez mandátu OSN. zdroj - [Charta osn, article 2.4.](https://www.un.org/en/about-us/un-charter/full-text)"
         },
         {
             "id": "72645.53",
             "authorIdentityId": "68b49242346b6dff0e533982",
             "created": 1768227921404,
-            "version": 1,
+            /* "version": 3, */
+            "version": 4,
             "text": "pravda"
         },
         {
@@ -382,6 +384,14 @@ const getOfflineDebate = () => {
             "discussionLinkTo": "74050.47",
             "text": "Překročení mezinárodně uznaných hranic Ukrajiny ruskou armádou je porušením státní suverenity, která je zakotvena v Chartě OSN. Rusko jednalo bez souhlasu ukrajinské vlády a bez mandátu OSN. zdroj - [Charta osn, article 2.4.](https://www.un.org/en/about-us/un-charter/full-text)"
         }
+        ,
+        {
+            "id": "72645.60",
+            "authorIdentityId": "68b49242346b6dff0e533982",
+            "created": 1768227960554,
+            "version": 1,
+            "text": "miluju nové texty, opravdu moc."
+        } 
     ],
     "locations": [
         {
@@ -643,6 +653,16 @@ const getOfflineDebate = () => {
             "authorIdentityId": "68b49242346b6dff0e533982",
             "created": 1768227960563,
             "parentId": "72645.9",
+            "relation": 1
+        },
+        {
+            "id": "72645.59",
+            "targetId": "72645.60",
+            "version": 1,
+            "isOrigin": true,
+            "authorIdentityId": "68b49242346b6dff0e533982",
+            "created": 1768227960563,
+            "parentId": "72645.47",
             "relation": 1
         }
     ],

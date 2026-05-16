@@ -241,4 +241,17 @@ public class ArgumentService {
 
         return mapper.toDto(argument);
     }
+
+    public void importArgument(Long debateId, String text, ArgumentType type, Long parentId, Long kialoId, Integer version, JwtAuthenticationToken token) throws DebateNotFoundException, ArgumentNotFoundException, UserNotFoundException, ServiceNotRespondingException {
+        Debate debate = debateRepository.findDebateByKialoId(debateId)
+                .orElseThrow(() -> new DebateNotFoundException("Debate not found with Kialo ID: " + debateId));
+        Argument parent = argumentRepository.findArgumentByKialoId(parentId)
+                .orElseThrow(() -> new ArgumentNotFoundException("Argument not found with kialo id: " + parentId));
+
+        Long newArgumentId = this.createArgument(text, type, parent.getId(), debate.getId(), token).getId();
+        Argument newArgument = argumentRepository.findById(newArgumentId).orElseThrow(() -> new ArgumentNotFoundException("Argument not found with kialo id: " + newArgumentId));
+        newArgument.setKialoVersion(version);
+        newArgument.setKialoId(kialoId);
+        argumentRepository.save(newArgument);
+    }
 }

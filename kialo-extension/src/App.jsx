@@ -4,9 +4,12 @@ import { assistantApi, contentApi } from './api';
 function App() {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [completeDebate, setCompleteDebate] = useState("");
+    
     const [currentDebateInfo, setCurrentDebateInfo] = useState({ debateId: "", argumentVersions: [] });
-    const [assistantInfo, setAssistantInfo] = useState({ isPresent: null, id: null, argumentVersions: null });
+    const [assistantInfo, setAssistantInfo] = useState({ isPresent: null, id: null, argumentVersions: [] });
+    
     const [unknownArguments, setUnknownArguments] = useState([]);
+    const [newArguments, setNewArguments] = useState([]);
     const [modifiedArguments, setModifiedArguments] = useState([]);
 
 
@@ -14,6 +17,7 @@ function App() {
     const initData = async () => {
         try {
             const contentInfo = await contentApi.getDebateInfo();
+            console.log(contentInfo);
             setCurrentDebateInfo(contentInfo);
 
             if (contentInfo?.debateId) {
@@ -28,20 +32,33 @@ function App() {
                         const detail = await assistantApi.getArgument(argument.id);
                         fullArguments.push(detail);
                     }
+                    console.log("unknown args: " + JSON.stringify(fullArguments));
                     setUnknownArguments(fullArguments);
-                        let foundModifiedArguments = [];
-                        currentDebateInfo.argumentVersions.forEach(kialoArgument => {
-                            const assistantArgument = assistInfo.argumentVersions.find(assistantArgument => assistantArgument.id === kialoArgument.id);
-                            if(assistantArgument && assistantArgument.version !== kialoArgument.version){
-                                console.log("found modified " + assistantArgument.id);
+
+                    let foundModifiedArguments = [];
+                    let foundNewArguments = [];
+
+                    contentInfo.argumentVersions.forEach(kialoArgument => {
+                        const assistantArgument = assistInfo.argumentVersions.find(assistantArgument => assistantArgument.kialoId == kialoArgument.id);
+                        if (!assistantArgument) {
+                            if(kialoArgument.id === "0"){
+                                return;
+                            }
+                            foundNewArguments.push(kialoArgument);
+                        } else {
+                            if (assistantArgument.version !== kialoArgument.version) {
                                 foundModifiedArguments.push(assistantArgument);
                             }
-                        });
-                        setModifiedArguments(foundModifiedArguments)
+                        }
+                    });
+                    console.log("newArgs: " + JSON.stringify(foundNewArguments));
+                    setNewArguments(foundNewArguments);
+                    console.log("ModifiedArgs: " + JSON.stringify(foundModifiedArguments));
+                    setModifiedArguments(foundModifiedArguments);
                 }
             }
         } catch (err) {
-            console.error("Něco se nepovedlo:", err);
+            console.error("Something went wrong", err);
         }
     };
 
@@ -52,7 +69,6 @@ function App() {
     const login = () => {
         chrome.runtime.sendMessage({ action: "login" }, (res) => {
             if (res?.success) setIsLoggedIn(true);
-            console.log("Login called")
         })
     }
 
@@ -88,13 +104,23 @@ function App() {
             ))}
 
             <h2>Modified on Kialo</h2>
-            {modifiedArguments.map((version) => (
+            {modifiedArguments.map((argument) => (
                 <article key={argument.id} style={{ border: "2px solid white", marginBottom: "10px", padding: "5px" }}>
                     <p><strong>ID:</strong> {argument.id}</p>
                     <p><strong>Version:</strong> {argument.version}</p>
                 </article>
             ))}
-          
+
+            <h2>New on Kialo</h2>
+            {newArguments.map((argument) => (
+                <article key={argument.id} style={{ border: "2px solid red", marginBottom: "10px", padding: "5px" }}>
+                    <p><strong>ID:</strong> {argument.id}</p>
+                    <p><strong>Kialo ID:</strong> {argument.kialoId}</p>
+                    <p>{argument.version}</p>
+                </article>
+            ))}
+
+
             <button onClick={logout} style={{ marginBottom: '10px' }}>Logout</button>
             <div className="terms">
                 {assistantInfo.terms ? assistantInfo.terms.map(term => (

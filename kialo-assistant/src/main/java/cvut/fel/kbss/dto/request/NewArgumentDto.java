@@ -1,21 +1,20 @@
 package cvut.fel.kbss.dto.request;
 
 import cvut.fel.kbss.model.ArgumentType;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class NewArgumentDto {
     private Long debateId;
     private String text;
     private ArgumentType type;
     private Long parentId;
-
-    public NewArgumentDto(Long debateId, String text, ArgumentType type, Long userId, Long parentId) {
-        this.debateId = debateId;
-        this.text = text;
-        this.type = type;
-        this.parentId = parentId;
-    }
+    private Long kialoId;
+    private Integer version;
 }

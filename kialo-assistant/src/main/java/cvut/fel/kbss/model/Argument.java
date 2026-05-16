@@ -4,6 +4,7 @@ package cvut.fel.kbss.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.Cascade;
 import org.jsoup.Jsoup;
@@ -17,6 +18,7 @@ import java.util.List;
 
 @Getter
 @Setter
+@NoArgsConstructor
 @Entity
 @Table
 public class Argument {
@@ -26,10 +28,6 @@ public class Argument {
         this.parent = parent;
         this.owner = owner;
         this.debate = debate;
-    }
-
-    public Argument(){
-
     }
 
     @Id

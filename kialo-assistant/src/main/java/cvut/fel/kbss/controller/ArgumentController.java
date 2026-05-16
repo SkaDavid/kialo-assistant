@@ -86,6 +86,15 @@ public class ArgumentController {
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 
+    @PostMapping("/sync-kialo")
+    public ResponseEntity<Void> addArgument(@RequestBody NewArgumentDto dto, JwtAuthenticationToken token) throws DebateNotFoundException, ArgumentNotFoundException, UserNotFoundException, ServiceNotRespondingException {
+        String keycloakId = token.getToken().getSubject();
+        log.info("User {} is importing new argument from Kialo", keycloakId);
+
+        argumentService.importArgument(dto.getDebateId(), dto.getText(), dto.getType(), dto.getParentId(), dto.getKialoId(), dto.getVersion(), token);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
     @PostMapping("/sync-termit/{argumentId}")
     public ResponseEntity<ArgumentResponseDto> synchronizeTermitArgument(@PathVariable long argumentId, JwtAuthenticationToken token) throws ServiceNotRespondingException, ArgumentNotFoundException {
         String keycloakId = token.getToken().getSubject();
