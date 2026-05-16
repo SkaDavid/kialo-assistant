@@ -136,4 +136,13 @@ public class DebateService {
         List<TermDefinitionDto> terms = termitClient.getVocabularyTerms(debate.getId(), token.getToken().getTokenValue());
         return mapper.toDebateInfoDto(debate, terms);
     }
+
+    public void deleteDebate(Long debateId, JwtAuthenticationToken token) throws DebateNotFoundException, UserNotFoundException, UnauthorizedAccessException {
+        Debate debate = debateRepository.findById(debateId).orElseThrow(() -> new DebateNotFoundException("Debate not found with id: " + debateId));
+        User user = userRepository.findByKeycloakId(token.getToken().getSubject()).orElseThrow(() -> new UserNotFoundException("User " + token.getToken().getSubject() + " was not found."));
+        if(!debate.getOwner().equals(user)){
+            throw new UnauthorizedAccessException("User " + token.getToken().getSubject() + " not authorized to delete debate " + debateId);
+        }
+        debateRepository.delete(debate);
+    }
 }
