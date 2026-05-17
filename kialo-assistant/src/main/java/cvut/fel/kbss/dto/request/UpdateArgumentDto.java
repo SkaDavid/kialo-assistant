@@ -9,4 +9,5 @@ import lombok.Setter;
 public class UpdateArgumentDto {
     private String text;
     private ArgumentType type;
+    private Integer kialoVersion;
 }

@@ -47,7 +47,7 @@ public class TermitClient {
         String createUrl = TERMIT_URL + "/resources/document/files?namespace="
                 + java.net.URLEncoder.encode(vocabIri + "/", java.nio.charset.StandardCharsets.UTF_8);
 
-        HttpResponse<String> response = executeRequest(createUrl, "POST", body, "application/json+ld", null, token);
+        HttpResponse<String> response = executeRequest(createUrl, "POST", body, "application/ld+json", null, token);
         if(response.statusCode() == 200 || response.statusCode() == 201){
             String uploadUrl = TERMIT_URL + "/resources/" + localName + "/content?namespace="
                     + java.net.URLEncoder.encode(fileNamespace, java.nio.charset.StandardCharsets.UTF_8);
