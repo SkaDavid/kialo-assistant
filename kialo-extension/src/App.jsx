@@ -1,6 +1,19 @@
 import { useState, useEffect } from 'react'
 import { assistantApi, contentApi } from './api';
 
+import { 
+  Container, Typography, Stack, Button, Box, Card, CardContent, CardActions,
+  TableContainer, Table, TableHead, TableBody, TableRow, TableCell, Paper,
+  Accordion, AccordionSummary, AccordionDetails
+} from '@mui/material';
+
+import LogoutIcon from '@mui/icons-material/Logout';
+import ImportExportIcon from '@mui/icons-material/ImportExport';
+import LoginIcon from '@mui/icons-material/Login';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import SyncIcon from '@mui/icons-material/Sync';
+import SearchIcon from '@mui/icons-material/Search';
+
 function App() {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [completeDebate, setCompleteDebate] = useState("");
@@ -47,7 +60,7 @@ function App() {
                             foundNewArguments.push(kialoArgument);
                         } else {
                             if (assistantArgument.version !== kialoArgument.version) {
-                                foundModifiedArguments.push(assistantArgument);
+                                foundModifiedArguments.push({...assistantArgument, text: kialoArgument.text, type: kialoArgument.type });
                             }
                         }
                     });
@@ -102,62 +115,250 @@ function App() {
         }
     }
 
+    const handleFindArgument = async (id) => {
+        try {
+            await contentApi.redirectTo(id);
+        } catch (error) {
+            console.error("Redirect failed:", error);
+        }
+    };
+
+    const handleAssistantPutArgument = async (argument) => {
+        console.log(argument);
+        const dto = {
+            id: argument.id,
+            kialoVersion: argument.kialoVersion,
+            text: argument.text,
+            type: argument.type  
+        }
+        assistantApi.updateArgument(dto);
+    }
+
+    const handleAssistantPostArgument = async (argument) => {
+        console.log(argument);
+        const dto = {
+            text: argument.text,
+            version: argument.version,
+            kialoId: argument.id,
+            type: argument.type, 
+            parentId: argument.parent, 
+            debateId: currentDebateInfo.debateId
+        }
+        assistantApi.createArgument(dto);
+    }
+
+    const findParentText = (argument) => {
+        const assistantVersion = assistantInfo.argumentVersions.find(version => version.id == argument.parent);
+        return currentDebateInfo.argumentVersions.find(version => version.id == assistantVersion.kialoId).text.substring(0, 40) + "...";
+    }
+
   return (
-    <div style={{ padding: '1rem' }}>
-      <h1>Kialo Assistant</h1>
+    <Container disableGutters sx={{ p: 2, maxWidth: "90%" }}>
+      <Typography variant="h4" sx={{ fontWeight: "bold", mb: 3, textAlign: "center" }} >Kialo Assistant</Typography>
       {!isLoggedIn ? (
-        <button onClick={login}>Log in through keycloak</button>
-      ) : (
-        <div>
-            {!currentDebateInfo.isPresent &&
-                <button onClick={handleImportDebate}>Import debate</button>
-            }  
-            <p>{completeDebate}</p>
-            <h2>Unknown</h2>
-            {unknownArguments.map((argument) => (
-                <article key={argument.id} style={{ border: "2px solid yellow", marginBottom: "10px", padding: "5px" }}>
-                    <p><strong>ID:</strong> {argument.id}</p>
-                    <p><strong>Text:</strong> {argument.text}</p>
-                    <p><strong>Type:</strong> {argument.type}</p>
-                    <p>parent ID: {argument.parent}</p>
-                    <button onClick={() => handleSendToKialo(argument)}>Send to kialo</button>
-                </article>
-            ))}
-
-            <h2>Modified on Kialo</h2>
-            {modifiedArguments.map((argument) => (
-                <article key={argument.id} style={{ border: "2px solid white", marginBottom: "10px", padding: "5px" }}>
-                    <p><strong>ID:</strong> {argument.id}</p>
-                    <p><strong>Version:</strong> {argument.version}</p>
-                </article>
-            ))}
-
-            <h2>New on Kialo</h2>
-            {newArguments.map((argument) => (
-                <article key={argument.id} style={{ border: "2px solid red", marginBottom: "10px", padding: "5px" }}>
-                    <p><strong>ID:</strong> {argument.id}</p>
-                    <p><strong>Kialo ID:</strong> {argument.kialoId}</p>
-                    <p>{argument.version}</p>
-                </article>
-            ))}
-
-
-            <button onClick={logout} style={{ marginBottom: '10px' }}>Logout</button>
-            <div className="terms">
-                {assistantInfo.terms ? assistantInfo.terms.map(term => (
-                    <article style={{ border: "2px solid green", marginBottom: "10px", padding: "5px" }} key={terms.term}>
-                        <p><strong>Term:</strong>{term.term}</p>
-                        <p><strong>Definition:</strong>{term.definition}</p>
-                    </article>
-                ))
-                :
-                <></>}
-                
-            </div>
-          
-        </div>
+        <Stack 
+            sx={{
+                p: 3,
+                border: "1px solid",
+                borderColor: "divider",
+                borderRadius: 2
+            }}
+        >
+            <Typography variant="outlined" sx={{ fontWeight: "bold", mb: 3, textAlign: "center" }} >Please, log in to proceed</Typography>
+            <Button variant="contained" color="primary" onClick={login} endIcon={<LoginIcon/>}>
+                Log in
+            </Button>
+        </Stack>
+        ) : (
+        <Stack spacing={3}>
+            {!assistantInfo.isPresent && (
+            <Stack 
+                alignItems="center" 
+                justifyContent="center" 
+                sx={{
+                    p: 3,
+                    border: "1px solid",
+                    borderColor: "divider",
+                    borderRadius: 2
+                }}
+            >
+                <Typography variant="outlined" sx={{ fontWeight: "bold", mb: 3, textAlign: "center" }} >This debate is not imported yet.</Typography>
+                <Button variant="contained" color="primary" onClick={handleImportDebate} startIcon={<ImportExportIcon/>}>
+                    Import debate
+                </Button>
+            </Stack>
+            )}
+            <Accordion variant="outlined" sx={{ borderRadius: '4px !important' }}>
+                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                    <Typography variant="h5" sx={{ fontWeight: "bold", color: '#d8ae24da' }}>
+                        Unknown ({unknownArguments.length})
+                    </Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                    <Stack spacing={1.5}>
+                        {unknownArguments.map((argument) => (
+                            <Card key={argument.id} variant="outlined" sx={{ borderLeft: `5px solid ${argument.type == "PRO" ? "green" : "red" }` }}>
+                                <CardContent>
+                                    <Typography variant="body2" sx={{ mb: 1 }}>
+                                        <strong>Text:</strong> {argument.text}
+                                    </Typography>
+                                    <Typography variant="caption" color="text.secondary" display="block">
+                                        <strong>Parent argument:</strong> {findParentText(argument)}
+                                    </Typography>
+                                </CardContent>
+                                <CardActions sx={{ justifyContent: 'center', pt: 1, flexDirection: "column", gap: 1 }}>
+                                    <Button
+                                        size="small" 
+                                        variant="outlined" 
+                                        color="primary" 
+                                        startIcon={<SearchIcon/>}
+                                        onClick={() => handleFindArgument(assistantInfo.argumentVersions.find(version => version.id == argument.parent).kialoId)}
+                                    >
+                                        Find parent
+                                    </Button>
+                                    <Button 
+                                        size="small" 
+                                        variant="contained" 
+                                        color="primary" 
+                                        startIcon={<ImportExportIcon/>}
+                                        onClick={() => handleSendToKialo(argument)}
+                                    >
+                                        Export to kialo
+                                    </Button>
+                                </CardActions>
+                            </Card>
+                        ))}
+                    </Stack>
+                </AccordionDetails>
+            </Accordion>
+            <Accordion variant="outlined" sx={{ borderRadius: '4px !important' }}>
+                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                    <Typography variant="h5" sx={{ fontWeight: "bold", color: '#0080a7' }}>
+                        Modified on Kialo ({modifiedArguments.length})
+                    </Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                    <Stack spacing={1.5}>
+                        {modifiedArguments.map((argument) => (
+                            <Card key={argument.id} variant="outlined" sx={{ borderLeft: `5px solid ${argument.type == "PRO" ? "green" : "red" }` }}>
+                                <CardContent>
+                                    <Typography variant="body2" sx={{ mb: 1 }}>
+                                        <strong>New text:</strong> {argument.text}
+                                    </Typography>
+                                </CardContent>
+                                <CardActions sx={{ justifyContent: 'flex-end', pt: 0, flexDirection: "column", gap: 1 }}>
+                                    <Button
+                                        size="small" 
+                                        variant="outlined" 
+                                        color="primary" 
+                                        startIcon={<SearchIcon/>}
+                                        onClick={() => handleFindArgument(argument.kialoId)}
+                                    >
+                                        Find argument
+                                    </Button>
+                                    <Button 
+                                        size="small" 
+                                        variant="contained" 
+                                        color="primary"
+                                        startIcon={<SyncIcon/>} 
+                                        onClick={() => handleAssistantPutArgument(argument)}
+                                    >
+                                        Refresh
+                                    </Button>
+                                </CardActions>
+                            </Card>
+                        ))}
+                    </Stack>
+                </AccordionDetails>
+            </Accordion>
+            <Accordion variant="outlined" sx={{ borderRadius: '4px !important' }}>
+                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                    <Typography variant="h5" sx={{ fontWeight: "bold", color: '#007ea5' }}>
+                        New on Kialo ({newArguments.length})
+                    </Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                    <Stack spacing={1.5}>
+                        {newArguments.map((argument) => (
+                            <Card key={argument.id} variant="outlined" sx={{ borderLeft: `5px solid ${argument.type == "PRO" ? "green" : "red" }` }}>
+                                <CardContent>
+                                    <Typography variant="body2" sx={{ mb: 1 }}>
+                                        <strong>Text:</strong> {argument.text}
+                                    </Typography>
+                                </CardContent>
+                                <CardActions sx={{ justifyContent: 'flex-end', pt: 0, flexDirection: "column", gap: 1 }}>
+                                    <Button
+                                        size="small" 
+                                        variant="outlined" 
+                                        color="primary" 
+                                        startIcon={<SearchIcon/>}
+                                        onClick={() => handleFindArgument(argument.id)}
+                                    >
+                                        Find Argument
+                                    </Button>
+                                    <Button 
+                                        size="small" 
+                                        variant="contained" 
+                                        color="primary" 
+                                        startIcon={<ImportExportIcon/>}
+                                        onClick={() => handleAssistantPostArgument(argument)}
+                                    >
+                                        Import to Assistant
+                                    </Button>
+                                </CardActions>
+                            </Card>
+                        ))}
+                    </Stack>
+                </AccordionDetails>
+            </Accordion>
+        {assistantInfo.terms && assistantInfo.terms.length > 0 && (
+            <Accordion variant="outlined" sx={{ borderRadius: '4px !important' }}>
+                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                    <Typography variant="h5" sx={{ fontWeight: "bold", color: '#2e7d32' }}>
+                        Terms & Definitions ({assistantInfo.terms.length})
+                    </Typography>
+                </AccordionSummary>
+                <AccordionDetails sx={{ p: 0 }}> {/* Odsazení p: 0 zajistí, že tabulka hezky sedne ke krajům */}
+                    <TableContainer component={Paper} variant="outlined" sx={{ border: 'none' }}>
+                        <Table size="small">
+                            <TableHead sx={{ bgcolor: 'rgba(0, 0, 0, 0.04)' }}>
+                                <TableRow>
+                                    <TableCell sx={{ fontWeight: 'bold', width: '30%' }}>Term</TableCell>
+                                    <TableCell sx={{ fontWeight: 'bold' }}>Definition</TableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {assistantInfo.terms.map((term) => (
+                                    <TableRow 
+                                        key={term.term} 
+                                        sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                                    >
+                                        <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>
+                                            {term.term}
+                                        </TableCell>
+                                        <TableCell>
+                                            {term.definition}
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
+                </AccordionDetails>
+            </Accordion>
+        )}          
+            <Button 
+                size="medium" 
+                variant="contained" 
+                color="primary" 
+                onClick={logout}
+                endIcon={<LogoutIcon/>}
+            >
+                Logout
+            </Button>
+        </Stack>
       )}
-    </div>
+    </Container>
   )
 }
 

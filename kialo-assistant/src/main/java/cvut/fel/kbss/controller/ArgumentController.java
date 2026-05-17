@@ -35,7 +35,7 @@ public class ArgumentController {
         String keycloakId = token.getToken().getSubject();
         log.info("User {} is creating new argument", keycloakId);
 
-        ArgumentResponseDto response = this.argumentService.createArgument(dto.getText(), dto.getType(), dto.getParentId(), dto.getDebateId(), token);
+        ArgumentResponseDto response = this.argumentService.createArgument(dto, token);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -54,7 +54,7 @@ public class ArgumentController {
         String keycloakId = token.getToken().getSubject();
         log.info("User {} is updating argument {}", keycloakId, id);
 
-        ArgumentResponseDto argument = argumentService.updateArgument(id, dto.getText(), dto.getType(), token);
+        ArgumentResponseDto argument = argumentService.updateArgument(id, dto.getText(), dto.getType(), dto.getKialoVersion(), token);
         return ResponseEntity.ok(argument);
     }
 
@@ -91,7 +91,7 @@ public class ArgumentController {
         String keycloakId = token.getToken().getSubject();
         log.info("User {} is importing new argument from Kialo", keycloakId);
 
-        argumentService.importArgument(dto.getDebateId(), dto.getText(), dto.getType(), dto.getParentId(), dto.getKialoId(), dto.getVersion(), token);
+        argumentService.importArgument(dto, token);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 

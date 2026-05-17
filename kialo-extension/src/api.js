@@ -66,7 +66,9 @@ export const kialoApi = {
 export const assistantApi = {
     createDebate: (dto) => assistantRequest(`/debate/import-debate`, { "method": "POST", "body": JSON.stringify(dto)}),
     getDebateInfo: (debateId) => assistantRequest(`/debate/kialo-info/${debateId}`, { "method": "GET" }),
-    getArgument: (argumentId) => assistantRequest( `/argument/${argumentId}`, { "method": "GET" })
+    getArgument: (argumentId) => assistantRequest( `/argument/${argumentId}`, { "method": "GET" }),
+    createArgument: (dto) => assistantRequest(`/argument`, { "method": "POST", "body": JSON.stringify(dto) }),
+    updateArgument: (dto) => assistantRequest(`/argument/${dto.id}`, {"method": "PUT", "body": JSON.stringify(dto)})
 }
 
 export const contentApi = {
@@ -81,5 +83,9 @@ export const contentApi = {
     postArgument: async (dto) => {
         const result = await contentRequest("postArgument", dto);
         return result.argument;
+    },
+    redirectTo: async (id) => {
+        const result = await contentRequest("redirectTo", id);
+        return result;
     }
 };

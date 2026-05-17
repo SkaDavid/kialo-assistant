@@ -10,6 +10,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     } else if (request.action === "postArgument"){
         handlePostArgument(request.payload, sendResponse);
         return true;
+    } else if (request.action === "redirectTo") {
+        handleRedirectTo(request.payload, sendResponse);
+        return true;
     }
 })
 
@@ -49,11 +52,27 @@ const handlePostArgument = async (data, sendResponse) => {
     }
 }
 
+const handleRedirectTo = (argumentId, sendResponse) => {
+    try {
+        const debateId = getDebateId();
+        
+        const newUrl = `${window.location.origin}/${debateId}.${argumentId}`;
+        
+        console.log("Redirecting tab to:", newUrl);
+        
+        window.location.href = newUrl;
+        
+        sendResponse({ success: true });
+    } catch (err) {
+        sendResponse({ error: err.message });
+    }
+};
+
 
 const getDebateInfo = async () => {
     return {
         debateId: getDebateId(),
-        argumentVersions: getArgumentVersions()
+        argumentVersions: getArgumentVersions(),
     }
 }
 
@@ -77,7 +96,8 @@ const getArgumentVersions = () => {
     /* kialo request nize */
     /* nacacheuj si to sem nekam */
     const claims = getOfflineDebate().claims;
-    return claims.map(claim => ({id: claim.id.split(".")[1], version: claim.version}))
+    const locations = getOfflineDebate().locations; 
+    return claims.map(claim => ({id: claim.id.split(".")[1], version: claim.version, text: claim.text, type: locations.find(location => location.targetId == claim.id).relation == 1 ? "PRO" : "CON"}))
 }
 
 const getDebateId = () => {
@@ -327,7 +347,7 @@ const getOfflineDebate = () => {
             "id": "72645.25",
             "authorIdentityId": "68b49242346b6dff0e533982",
             "created": 1758456484196,
-            "version": 1,
+            "version": 8,
             "text": "Memorandum nebylo mezinárodní smlouvou, ale politickým prohlášením. Právní závaznost je sporná."
         },
         {
@@ -341,7 +361,7 @@ const getOfflineDebate = () => {
             "id": "72645.29",
             "authorIdentityId": "68b49242346b6dff0e533982",
             "created": 1758457216930,
-            "version": 1,
+            "version": 7,
             "text": "Připojení Krymu bylo legitimní, rozhodlo o tom demokratické Krymské referendum v roce 2014, kde 96 procent voličů volilo pro připojení k Rusku"
         },
         {
@@ -362,7 +382,7 @@ const getOfflineDebate = () => {
             "id": "72645.35",
             "authorIdentityId": "68b49242346b6dff0e533982",
             "created": 1758457530514,
-            "version": 1,
+            "version": 7,
             "text": "Mezinárodní právo uznává právo na sebeurčení, ale neumožňuje jednostrannou změnu hranic státu bez souhlasu vlády."
         },
         {
@@ -376,15 +396,15 @@ const getOfflineDebate = () => {
             "id": "72645.39",
             "authorIdentityId": "68b49242346b6dff0e533982",
             "created": 1758458115457,
-            "version": 4,
+            "version": 8,
             "text": "Existují spekulace, že referendum bylo zfalšované. Např. v Sevastopolu podle výsledků referenda muselo hlasovat o 233 procent více lidí, než kolik jich ve městě žilo rok před referendem. zdroj - [ct24.ceskatelevize.cz](https://ct24.ceskatelevize.cz/clanek/svet/krym-vyhlasil-samostatnost-bylo-ale-referendum-v-poradku-328088)"
         },
         {
             "id": "72645.41",
             "authorIdentityId": "68b49242346b6dff0e533982",
             "created": 1758458236074,
-            "version": 3,
-            "text": "Podle Ruské televize Russia-24 se referenda zúčastnili zahraniční pozorovatelé z 21 států, včetně tří českých pozorovatelů \\(Milan Šarapatka, Stanislav Berkovec a Miloslav Soušek\\). Např. Soušek prohlásil, že \"lidé chodí v klidu, jsou rádi a všechno je dobré\". Zdroj - [cs.wikipedia.org](https://cs.wikipedia.org/wiki/Krymsk%C3%A9_referendum_\\(2014\\))"
+            "version": 6,
+            "text": "Podle Marka Buffalase referenda zúčastnili zahraniční pozorovatelé z 21 států, včetně tří českých pozorovatelů \\(Milan Šarapatka, Stanislav Berkovec a Miloslav Soušek\\). Např. Soušek prohlásil, že \"lidé chodí v klidu, jsou rádi a všechno je dobré\". Zdroj - [cs.wikipedia.org](https://cs.wikipedia.org/wiki/Krymsk%C3%A9_referendum_\\(2014\\))"
         },
         {
             "id": "72645.43",
@@ -404,16 +424,14 @@ const getOfflineDebate = () => {
             "id": "72645.47",
             "authorIdentityId": "68b49242346b6dff0e533982",
             "created": 1758459155768,
-/*             "version": 2, */
-            "version": 3,
+            "version": 4,
             "text": "Překročení mezinárodně uznaných hranic Ukrajiny ruskou armádou je porušením státní suverenity, která je zakotvena v Chartě OSN. Rusko jednalo bez souhlasu ukrajinské vlády a bez mandátu OSN. zdroj - [Charta osn, article 2.4.](https://www.un.org/en/about-us/un-charter/full-text)"
         },
         {
             "id": "72645.53",
             "authorIdentityId": "68b49242346b6dff0e533982",
             "created": 1768227921404,
-            /* "version": 3, */
-            "version": 4,
+            "version": 6,
             "text": "pravda"
         },
         {
@@ -423,20 +441,27 @@ const getOfflineDebate = () => {
             "version": 2,
             "discussionLinkTo": "74050.47",
             "text": "Překročení mezinárodně uznaných hranic Ukrajiny ruskou armádou je porušením státní suverenity, která je zakotvena v Chartě OSN. Rusko jednalo bez souhlasu ukrajinské vlády a bez mandátu OSN. zdroj - [Charta osn, article 2.4.](https://www.un.org/en/about-us/un-charter/full-text)"
-        },/* ,
+        },
         {
             "id": "72645.60",
             "authorIdentityId": "68b49242346b6dff0e533982",
             "created": 1768227960554,
             "version": 1,
             "text": "miluju nové texty, opravdu moc."
-        } */
+        },
         {
             "id": "72645.62",
             "authorIdentityId": "68b49242346b6dff0e533982",
             "created": 1768227960554,
             "version": 1,
             "text": "miluju nové texty, opravdu moc, moc, moc, moc."
+        },
+        {
+            "id": "72645.64",
+            "authorIdentityId": "68b49242346b6dff0e533982",
+            "created": 1768227960554,
+            "version": 1,
+            "text": "NOVY TEST"
         }  
     ],
     "locations": [
@@ -714,13 +739,23 @@ const getOfflineDebate = () => {
         {
             "id": "72645.63",
             "targetId": "72645.62",
-            "version": 1,
+            "version": 4,
             "isOrigin": true,
             "authorIdentityId": "68b49242346b6dff0e533982",
             "created": 1768227960563,
             "parentId": "72645.47",
             "relation": 1
+        },{
+            "id": "72645.67",
+            "targetId": "72645.64",
+            "version": 1,
+            "isOrigin": true,
+            "authorIdentityId": "68b49242346b6dff0e533982",
+            "created": 1768227960563,
+            "parentId": "72645.62",
+            "relation": 1
         }
+
     ],
     "touchedClaimOrLocationIds": [
         "72645.0",

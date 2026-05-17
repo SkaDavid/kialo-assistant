@@ -6,6 +6,7 @@ import cvut.fel.kbss.client.ExplanationClient;
 import cvut.fel.kbss.client.FallacyClient;
 import cvut.fel.kbss.client.TermitClient;
 import cvut.fel.kbss.dto.Mapper;
+import cvut.fel.kbss.dto.request.NewArgumentDto;
 import cvut.fel.kbss.dto.response.AIArgumentResponseDto;
 import cvut.fel.kbss.dto.response.ArgumentResponseDto;
 import cvut.fel.kbss.dto.response.FallacyResponseDto;
@@ -51,27 +52,31 @@ public class ArgumentService {
     }
 
     @Transactional
-    public ArgumentResponseDto createArgument(String text, ArgumentType type, Long parentId, Long debateId, JwtAuthenticationToken token)
+    public ArgumentResponseDto createArgument(NewArgumentDto dto, JwtAuthenticationToken token)
             throws UserNotFoundException, DebateNotFoundException, ArgumentNotFoundException, ServiceNotRespondingException {
         User owner = userRepository.findByKeycloakId(token.getToken().getSubject()).orElseThrow(() -> new UserNotFoundException("Owner not found"));
-        Argument parent = argumentRepository.findById(parentId).orElseThrow(() -> new ArgumentNotFoundException("Parent not found"));
-        Debate debate = debateRepository.findById(debateId).orElseThrow(() -> new DebateNotFoundException("Debate not found"));
+        Argument parent = argumentRepository.findById(dto.getParentId()).orElseThrow(() -> new ArgumentNotFoundException("Parent not found"));
+        Debate debate = debateRepository.findById(dto.getDebateId()).orElseThrow(() -> new DebateNotFoundException("Debate not found"));
 
         Argument argument = new Argument();
         argument.setDebate(debate);
         argument.setOwner(owner);
         argument.setParent(parent);
-        argument.setType(type);
-        argument.setText(text);
+        argument.setType(dto.getType());
+        argument.setText(dto.getText());
         argument.setFallacyCheck(new FallacyCheck());
-        argument.setSegments(htmlParser.parseHtmlToSegments(text));
+        argument.setSegments(htmlParser.parseHtmlToSegments(dto.getText()));
+        if(dto.getKialoId() != null){
+            argument.setKialoId(dto.getKialoId());
+            argument.setKialoVersion(dto.getVersion());
+        }
 
         List<Argument> debateArguments = debate.getArguments();
         debateArguments.add(argument);
         debate.setArguments(debateArguments);
         Argument newArgument = argumentRepository.save(argument);
 
-        termitClient.createArgumentFile(text, debateId, newArgument.getId(), token.getToken().getTokenValue());
+        termitClient.createArgumentFile(newArgument.getText(), newArgument.getDebate().getId(), newArgument.getId(), token.getToken().getTokenValue());
 
         return mapper.toDto(newArgument);
     }
@@ -94,7 +99,7 @@ public class ArgumentService {
     }
 
     @Transactional
-    public ArgumentResponseDto updateArgument(long argumentId, String newText, ArgumentType newType, JwtAuthenticationToken token)
+    public ArgumentResponseDto updateArgument(long argumentId, String newText, ArgumentType newType, Integer kialoVersion, JwtAuthenticationToken token)
             throws ArgumentNotFoundException, UnauthorizedAccessException, UserNotFoundException, ServiceNotRespondingException {
 
         Argument argument = argumentRepository.findById(argumentId).orElseThrow(() -> new ArgumentNotFoundException("Argument not found"));
@@ -110,6 +115,7 @@ public class ArgumentService {
         argument.setType(newType);
         argument.setSegments(htmlParser.parseHtmlToSegments(newText));
         argument.setFallacyCheck(new FallacyCheck());
+        argument.setKialoVersion(kialoVersion);
 
         long debateId = argument.getDebate().getId();
         termitClient.updateArgumentFile(debateId, argumentId, newText, token.getToken().getTokenValue());
@@ -246,16 +252,16 @@ public class ArgumentService {
         return mapper.toDto(argument);
     }
 
-    public void importArgument(Long debateId, String text, ArgumentType type, Long parentId, Long kialoId, Integer version, JwtAuthenticationToken token) throws DebateNotFoundException, ArgumentNotFoundException, UserNotFoundException, ServiceNotRespondingException {
-        Debate debate = debateRepository.findDebateByKialoId(debateId)
-                .orElseThrow(() -> new DebateNotFoundException("Debate not found with Kialo ID: " + debateId));
-        Argument parent = argumentRepository.findArgumentByKialoId(parentId)
-                .orElseThrow(() -> new ArgumentNotFoundException("Argument not found with kialo id: " + parentId));
+    public void importArgument(NewArgumentDto dto, JwtAuthenticationToken token) throws DebateNotFoundException, ArgumentNotFoundException, UserNotFoundException, ServiceNotRespondingException {
+        Debate debate = debateRepository.findDebateByKialoId(dto.getDebateId())
+                .orElseThrow(() -> new DebateNotFoundException("Debate not found with Kialo ID: " + dto.getDebateId()));
+        Argument parent = argumentRepository.findArgumentByKialoId(dto.getParentId())
+                .orElseThrow(() -> new ArgumentNotFoundException("Argument not found with kialo id: " + dto.getParentId()));
 
-        Long newArgumentId = this.createArgument(text, type, parent.getId(), debate.getId(), token).getId();
+        Long newArgumentId = this.createArgument(dto, token).getId();
         Argument newArgument = argumentRepository.findById(newArgumentId).orElseThrow(() -> new ArgumentNotFoundException("Argument not found with kialo id: " + newArgumentId));
-        newArgument.setKialoVersion(version);
-        newArgument.setKialoId(kialoId);
+        newArgument.setKialoVersion(dto.getVersion());
+        newArgument.setKialoId(dto.getKialoId());
         argumentRepository.save(newArgument);
     }
 }
