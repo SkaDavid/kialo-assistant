@@ -1,5 +1,5 @@
 const ASSISTANT_URL = "http://localhost:8082";
-const KIALO_URL = "https://www.kialo.com/api/v1/";
+const KIALO_URL = "https://www.kialo.com/api/v1";
 
 export const getToken = () => {
     const name = "_xsrf";
@@ -60,7 +60,8 @@ const kialoRequest = async (endpoint, options) => {
 }
 
 export const kialoApi = {
-    postArgument: (dto) => kialoRequest(`discussiongraph`, {"method": "POST", "credentials": "include", "body": JSON.stringify(dto)})
+    postArgument: (dto) => kialoRequest(`/discussiongraph`, {"method": "POST", "credentials": "include", "body": JSON.stringify(dto)}),
+    getDebate: (debateId) => kialoRequest(`/discussiongraph?discussionId=${debateId}`, {"method": "GET", "credentials": "include"})
 }
 
 export const assistantApi = {

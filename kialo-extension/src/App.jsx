@@ -135,15 +135,15 @@ function App() {
     }
 
     const handleAssistantPostArgument = async (argument) => {
-        console.log(argument);
         const dto = {
             text: argument.text,
             version: argument.version,
             kialoId: argument.id,
             type: argument.type, 
-            parentId: argument.parent, 
-            debateId: currentDebateInfo.debateId
+            parentId: argument.parent.substring(argument.parent.indexOf(".") + 1), 
+            debateId: assistantInfo.id
         }
+        console.log(dto);
         assistantApi.createArgument(dto);
     }
 
@@ -171,7 +171,7 @@ function App() {
         </Stack>
         ) : (
         <Stack spacing={3}>
-            {!assistantInfo.isPresent && (
+            {!assistantInfo.present && (
             <Stack 
                 alignItems="center" 
                 justifyContent="center" 
