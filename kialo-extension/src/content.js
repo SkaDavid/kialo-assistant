@@ -107,16 +107,8 @@ const getArgumentVersions = async () => {
 }
 
 const getDebateId = () => {
-    if(!debateId){
-        if(debateData){
-            debateId = debateData.claims[1].id.substring(0, 5)
-            return debateId;
-        } 
-        else{
-            return window.location.href.substring(window.location.href.length - 5);
-        }
-    } 
-    return debateId;
+    return window.location.href.split('?')[0].split('/').pop().split('.')[0]; 
+    
 }
 
 const getTopic = () => {
