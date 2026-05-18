@@ -88,6 +88,7 @@
         "composite": true,
         "composites": {
           "realm": [
+            "ROLE_FULL_USER",
             "offline_access",
             "uma_authorization"
           ],
@@ -456,9 +457,9 @@
   "otpPolicyPeriod": 30,
   "otpPolicyCodeReusable": false,
   "otpSupportedApplications": [
-    "totpAppMicrosoftAuthenticatorName",
+    "totpAppGoogleName",
     "totpAppFreeOTPName",
-    "totpAppGoogleName"
+    "totpAppMicrosoftAuthenticatorName"
   ],
   "webAuthnPolicyRpEntityName": "keycloak",
   "webAuthnPolicySignatureAlgorithms": [
@@ -698,11 +699,11 @@
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
       "redirectUris": [
-        "https://ckekebafemjljcdffihdkhobhpfomphh.chromiumapp.org/*",
+        "https://alaheejmgkjhljklefepoknhceodghhb.chromiumapp.org/*",
         "http://127.0.0.1:1234/*"
       ],
       "webOrigins": [
-        "https://ckekebafemjljcdffihdkhobhpfomphh.chromiumapp.org"
+        "https://alaheejmgkjhljklefepoknhceodghhb.chromiumapp.org"
       ],
       "notBefore": 0,
       "bearerOnly": false,
@@ -1268,7 +1269,7 @@
           "protocolMapper": "oidc-audience-mapper",
           "consentRequired": false,
           "config": {
-            "included.client.audience": "graphdb",
+            "included.client.audience": "kialo-assistant",
             "id.token.claim": "false",
             "access.token.claim": "true",
             "userinfo.token.claim": "false"
@@ -1887,7 +1888,7 @@
         "disableUserInfo": "false",
         "filteredByClaim": "false",
         "syncMode": "IMPORT",
-        "clientSecret": "**********"
+        "clientSecret": "${GOOGLE_SECRET_KEY}"
       }
     }
   ],
@@ -1953,14 +1954,14 @@
         "subComponents": {},
         "config": {
           "allowed-protocol-mapper-types": [
-            "saml-user-property-mapper",
+            "oidc-sha256-pairwise-sub-mapper",
+            "saml-role-list-mapper",
+            "oidc-full-name-mapper",
             "oidc-usermodel-property-mapper",
-            "oidc-usermodel-attribute-mapper",
             "oidc-address-mapper",
             "saml-user-attribute-mapper",
-            "saml-role-list-mapper",
-            "oidc-sha256-pairwise-sub-mapper",
-            "oidc-full-name-mapper"
+            "oidc-usermodel-attribute-mapper",
+            "saml-user-property-mapper"
           ]
         }
       },
@@ -1972,14 +1973,14 @@
         "subComponents": {},
         "config": {
           "allowed-protocol-mapper-types": [
-            "oidc-usermodel-attribute-mapper",
-            "saml-user-attribute-mapper",
-            "oidc-address-mapper",
-            "saml-role-list-mapper",
             "oidc-full-name-mapper",
             "oidc-sha256-pairwise-sub-mapper",
+            "saml-user-property-mapper",
+            "saml-role-list-mapper",
             "oidc-usermodel-property-mapper",
-            "saml-user-property-mapper"
+            "saml-user-attribute-mapper",
+            "oidc-usermodel-attribute-mapper",
+            "oidc-address-mapper"
           ]
         }
       },
