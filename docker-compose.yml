@@ -36,7 +36,7 @@ services:
     command:
       - start --import-realm
     environment:
-      KC_IMPORT: realm-export.backup.json
+      KC_IMPORT: realm-export.json
       KC_HOSTNAME_URL: ${URL}${ROOT}/sluzby/auth
       KC_HOSTNAME_ADMIN_URL: ${URL}${ROOT}/sluzby/auth/
       KC_HOSTNAME_STRICT_BACKCHANNEL: false
@@ -58,6 +58,7 @@ services:
       VOCABULARY_USER_TYPE: http://onto.fel.cvut.cz/ontologies/application/termit/pojem/uživatel-termitu
       ADD_ACCOUNTS: false
       REALM_ID: termit
+      GOOGLE_SECRET_KEY: ${GOOGLE_SECRET_KEY}
     restart: always
     volumes:
       - auth-server:/opt/keycloak/data
@@ -139,6 +140,23 @@ services:
       - "8082:8082"
     environment:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://kialo-db:5432/${KIALO_DB_DB:-kialo_db}
+      - SPRING_DATASOURCE_USERNAME=${KIALO_DB_USER:-kialo_admin}
+      - SPRING_DATASOURCE_PASSWORD=${KIALO_DB_PASSWORD:-kialo_secret_pass}
+      - SPRING_SQL_INIT_MODE=${KIALO_SQL_INIT_MODE:-never}
+    depends_on:
+      - kialo-db
+
+
+  kialo-db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: ${KIALO_DB_DB:-kialo_db}
+      POSTGRES_USER: ${KIALO_DB_USER:-kialo_admin}
+      POSTGRES_PASSWORD: ${KIALO_DB_PASSWORD:-kialo_secret_pass}
+    restart: always
+    volumes:
+      - kialo-db-data:/var/lib/postgresql/data
 
   web-client:
     build:
@@ -169,3 +187,4 @@ volumes:
   termit-db-server:
   termit-server:
   annotace-server:
+  kialo-db-data:
