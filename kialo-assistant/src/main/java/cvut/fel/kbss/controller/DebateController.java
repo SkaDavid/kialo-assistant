@@ -62,11 +62,11 @@ public class DebateController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteDebate(@PathVariable Long debateId, JwtAuthenticationToken token) throws UserNotFoundException, DebateNotFoundException, UnauthorizedAccessException {
+    public ResponseEntity<Void> deleteDebate(@PathVariable Long id, JwtAuthenticationToken token) throws UserNotFoundException, DebateNotFoundException, UnauthorizedAccessException {
         String keycloakId = token.getToken().getSubject();
-        log.info("User {} is deleting debate {}", keycloakId, debateId);
+        log.info("User {} is deleting debate {}", keycloakId, id);
 
-        debateService.deleteDebate(debateId, token);
+        debateService.deleteDebate(id, token);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
