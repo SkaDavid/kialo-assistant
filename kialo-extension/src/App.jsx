@@ -27,6 +27,14 @@ function App() {
 
 
     useEffect(() => {
+        chrome.storage.local.get("access_token", (result) => {
+            if (result.access_token) {
+                setIsLoggedIn(true);
+            }
+        });
+    }, []);
+
+    useEffect(() => {
     const initData = async () => {
         try {
             const contentInfo = await contentApi.getDebateInfo();
@@ -76,7 +84,7 @@ function App() {
     };
 
     initData();
-}, []);
+}, [isLoggedIn]);
 
 
     const login = () => {
@@ -147,6 +155,10 @@ function App() {
         assistantApi.createArgument(dto);
     }
 
+    const handleReloadSidepanel = () => {
+        window.location.reload();
+    }
+
     const findParentText = (argument) => {
         const assistantVersion = assistantInfo.argumentVersions.find(version => version.id == argument.parent);
         return currentDebateInfo.argumentVersions.find(version => version.id == assistantVersion.kialoId).text.substring(0, 40) + "...";
@@ -171,6 +183,17 @@ function App() {
         </Stack>
         ) : (
         <Stack spacing={3}>
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                <Button 
+                    size="small" 
+                    variant="outlined" 
+                    color="primary"
+                    startIcon={<SyncIcon />} 
+                    onClick={handleReloadSidepanel}
+                >
+                    Refresh Panel
+                </Button>
+            </Box>
             {!assistantInfo.present && (
             <Stack 
                 alignItems="center" 

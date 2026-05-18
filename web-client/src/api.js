@@ -1,4 +1,4 @@
-import keycloak from "../config/keycloak";
+import keycloak from "./config/keycloak.js";
 
 const URL = "http://localhost:8082";
 
@@ -31,5 +31,7 @@ export const api = {
     createAIDebate: (dto) => request("/debate/ai", { "method": "POST", "body": JSON.stringify(dto)}),
     createAIArgument: (dto) => request("/argument/ai", { "method": "POST", body: JSON.stringify(dto)}),
     importDebate: (dto) => request("/debate/import-debate", { "method": "POST", "body": JSON.stringify(dto)}),
-    syncArgument: (id) => request(`/argument/sync-termit/${id}`, { "method": "POST" })
+    syncArgument: (id) => request(`/argument/sync-termit/${id}`, { "method": "POST" }),
+    deleteDebate: (id) => request(`/debate/${id}`, { "method": "DELETE" }),
+    deleteFallacy: (id) => request(`/argument/fallacy/${id}`, { "method": "DELETE" })
 }
