@@ -126,25 +126,38 @@ public class ArgumentService {
     @Transactional
     public FallacyResponseDto testFallacy(String text, Long argumentId) throws ServiceNotRespondingException, APIkeyNotFoundException, ArgumentNotFoundException {
         FallacyResponseDto fallacyTest = fallacyClient.testFallacy(text);
-        Argument argument = argumentRepository.findById(argumentId).orElseThrow(() -> new ArgumentNotFoundException("Argument not found with id: " + argumentId));
-        if(fallacyTest.getScore() > 0.75){
+
+        if (fallacyTest.getScore() > 0.75) {
             ValidationResponse validation = explanationClient.explainFallacy(fallacyTest.getLabel(), text);
             fallacyTest.setFallacy(validation.isFallacy());
             fallacyTest.setExplanation(validation.getExplanation());
-
-            FallacyCheck fallacyCheck = argument.getFallacyCheck();
-            fallacyCheck.setFallacyResult(FallacyResult.FALLACY);
-            fallacyCheck.setExplanation(validation.getExplanation());
-            fallacyCheck.setScore(fallacyTest.getScore());
-            fallacyCheck.setFallacy(fallacyTest.getExplanation());
         } else {
             fallacyTest.setExplanation("No fallacy detected");
             fallacyTest.setFallacy(false);
+        }
+
+        if (argumentId != null) {
+            Argument argument = argumentRepository.findById(argumentId)
+                    .orElseThrow(() -> new ArgumentNotFoundException("Argument not found with id: " + argumentId));
 
             FallacyCheck fallacyCheck = argument.getFallacyCheck();
-            fallacyCheck.setFallacyResult(FallacyResult.CLEAN);
-            fallacyCheck.setScore(fallacyTest.getScore());
+            if (fallacyCheck == null) {
+                fallacyCheck = new FallacyCheck();
+                argument.setFallacyCheck(fallacyCheck);
+            }
+
+            if (fallacyTest.getScore() > 0.75) {
+                fallacyCheck.setFallacyResult(FallacyResult.FALLACY);
+                fallacyCheck.setExplanation(fallacyTest.getExplanation());
+                fallacyCheck.setScore(fallacyTest.getScore());
+            } else {
+                fallacyCheck.setFallacyResult(FallacyResult.CLEAN);
+                fallacyCheck.setScore(fallacyTest.getScore());
+            }
+
+            argumentRepository.save(argument);
         }
+
         return fallacyTest;
     }
 
@@ -264,4 +277,18 @@ public class ArgumentService {
         newArgument.setKialoId(dto.getKialoId());
         argumentRepository.save(newArgument);
     }
+
+    @Transactional
+    public void deleteFallacy(long argumentId) throws ArgumentNotFoundException {
+        Argument argument = argumentRepository.findById(argumentId)
+                .orElseThrow(() -> new ArgumentNotFoundException("Argument not found with kialo id: " + argumentId));
+
+        FallacyCheck fallacyCheck = argument.getFallacyCheck();
+        fallacyCheck.setFallacy(null);
+        fallacyCheck.setFallacyResult(FallacyResult.CLEAN);
+        fallacyCheck.setExplanation(null);
+        fallacyCheck.setExplanation(null);
+    }
+
+
 }

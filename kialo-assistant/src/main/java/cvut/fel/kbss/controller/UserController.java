@@ -24,7 +24,6 @@ public class UserController {
         this.userService = userService;
     }
 
-    //TODO budu to používat?
     @GetMapping()
     public ResponseEntity<UserResponseDto> getUser(@RequestParam String username) throws UserNotFoundException {
         log.info("Requesting user {} details", username);

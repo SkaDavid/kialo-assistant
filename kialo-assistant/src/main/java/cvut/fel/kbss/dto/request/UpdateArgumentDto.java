@@ -1,6 +1,7 @@
 package cvut.fel.kbss.dto.request;
 
 import cvut.fel.kbss.model.ArgumentType;
+import cvut.fel.kbss.model.DebateVisibility;
 import lombok.Getter;
 import lombok.Setter;
 

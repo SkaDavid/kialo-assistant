@@ -10,11 +10,9 @@ import cvut.fel.kbss.dto.response.FallacyResponseDto;
 import cvut.fel.kbss.exception.*;
 import cvut.fel.kbss.service.ArgumentService;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 
@@ -103,5 +101,15 @@ public class ArgumentController {
         ArgumentResponseDto response = argumentService.syncWithTermit(argumentId, token.getToken().getTokenValue());
 
         return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @DeleteMapping("/fallacy/{argumentId}")
+    public ResponseEntity<Void> deleteFallacy(@PathVariable long argumentId, JwtAuthenticationToken token) throws ArgumentNotFoundException {
+        String keycloakId = token.getToken().getSubject();
+        log.info("User {} is deleting fallacy on argument: " + argumentId, keycloakId);
+
+        argumentService.deleteFallacy(argumentId);
+
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }
