@@ -74,8 +74,6 @@ services:
       - auth-server
     environment:
       GDB_JAVA_OPTS: -Dgraphdb.external-url=${URL}${ROOT}/sluzby/termit-db-server -Ddefault.min.distinct.threshold=67108864 -Dgraphdb.workbench.cors.enable=true -Dgraphdb.workbench.cors.origin=* -Dgraphdb.workbench.cors.expose-headers=*
-    ports:
-      - "7200:7200"
     restart: always
     volumes:
       - ./termit-db-server/init-data:/root/graphdb-import:ro

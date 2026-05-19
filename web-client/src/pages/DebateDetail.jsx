@@ -65,6 +65,39 @@ const DebateDetail = () => {
     setActiveId(clicked.id);
   };
 
+  const handleGenerateAIArgumentText = async (argumentId, type) => {
+    const argument = debate.arguments.find((arg) => arg.id === argumentId);
+    const children = debate.arguments.filter((arg) => arg.parent === argumentId);
+    let currentParentId = argument.parent;
+
+    let parents = [];
+    while (currentParentId != null) {
+      const parent = debate.arguments.find((arg) => arg.id === currentParentId);
+      if (parent) {
+        parents.push(parent);
+        currentParentId = parent.parent;
+      } else {
+        currentParentId = null;
+      }
+    }
+
+    const debateContext = [...parents.reverse(), argument, ...children];
+
+    const dto = {
+      type: type,
+      text: argument.text,
+      debate: debateContext
+    };
+
+    try {
+      const reply = await api.createAIArgument(dto);
+      return reply?.text || "";
+    } catch (error) {
+      console.error("Error when creating ai argument: ", error);
+      return "";
+    }
+  };
+
   const argumentHandlers = {
     onArgumentClick: handleArgumentClick,
     onOpenReply: (e, id) => { e.stopPropagation(); setReplyArgId(id); setUpdateArgId(null); },
@@ -103,6 +136,9 @@ const DebateDetail = () => {
     onSyncArgument: async (id) => {
       await api.syncArgument(id);
       fetchData();
+    },
+    onGenerateAI: async (argumentId, type) => {
+      return await handleGenerateAIArgumentText(argumentId, type);
     }
   };
 

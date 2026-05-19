@@ -129,7 +129,7 @@ const Argument = ({ arg, activePath, currentUser, currentAction, handlers }) => 
           )}
 
           <Typography variant="caption" color="text.secondary">
-            Autor: <strong>{arg.owner.username}</strong>
+            Author: <strong>{arg.owner.username}</strong>
           </Typography>
         </CardContent>
 
@@ -221,6 +221,7 @@ const Argument = ({ arg, activePath, currentUser, currentAction, handlers }) => 
               initialData={{ text: "", type: "PRO"}}  
               onSubmit={(data) => handlers.onSubmitReply(arg.id, data)}
               onCancel={() => handlers.setReplyArgId(null)}
+              onGenerateAI={(type) => handlers.onGenerateAI(arg.id, type)}
             />
           </Box>
         )}

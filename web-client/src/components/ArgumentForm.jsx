@@ -11,8 +11,19 @@ import {
 import SendIcon from '@mui/icons-material/Send';
 import CloseIcon from '@mui/icons-material/Close';
 
-const ArgumentForm = ({ onSubmit, onCancel, initialData }) => {
+const ArgumentForm = ({ onSubmit, onCancel, initialData, onGenerateAI }) => {
   const [formData, setFormData] = useState(initialData);
+
+  const handleAIGenerate = async (type) => {
+    try {
+      const aiText = await onGenerateAI(type);
+      if (aiText) {
+        setFormData({ text: aiText, type: type });
+      }
+    } catch (error) {
+      console.error("Chyba při komunikaci s AI:", error);
+    }
+  };
 
   return (
     <Box 
@@ -57,7 +68,28 @@ const ArgumentForm = ({ onSubmit, onCancel, initialData }) => {
           />
         </RadioGroup>
       </FormControl>
-
+      <Box sx={{ display: 'flex', gap: 1 }}>
+        {onGenerateAI && (
+          <>
+            <Button
+              size="small"
+              variant="text"
+              color="success"
+              onClick={() => handleAIGenerate("PRO")}
+            >
+              Generate Pro argument
+            </Button>
+            <Button
+              size="small"
+              variant="text"
+              color="error"
+              onClick={() => handleAIGenerate("CON")}
+            >
+              Generovat Con argument
+            </Button>
+          </>
+        )}
+      </Box>
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
         <Button 
           size="small"
