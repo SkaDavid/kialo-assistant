@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/24lkpr-distribution.iml" filepath="$PROJECT_DIR$/.idea/24lkpr-distribution.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/SAP.iml" filepath="$PROJECT_DIR$/.idea/SAP.iml" />
     </modules>
   </component>
 </project>

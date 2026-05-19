@@ -9,7 +9,7 @@
         <relativePath/>
     </parent>
     <groupId>cvut.fel.kbss</groupId>
-    <artifactId>kialo-assistant</artifactId>
+    <artifactId>SAP-BE</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>kialo-assistant</name>
     <description>Backend service for the Kialo Assistant browser extension</description>

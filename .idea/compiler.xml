@@ -14,13 +14,13 @@
         <processorPath useClasspath="false">
           <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/unknown/lombok-unknown.jar" />
         </processorPath>
-        <module name="kialo-assistant" />
+        <module name="SAP-BE" />
       </profile>
     </annotationProcessing>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
-      <module name="kialo-assistant" options="-parameters" />
+      <module name="SAP-BE" options="-parameters" />
     </option>
   </component>
 </project>
