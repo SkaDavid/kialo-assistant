@@ -1,18 +1,24 @@
 import { useState } from 'react';
-import { 
+import { api } from '../api'
+
+import{
   Box, 
   TextField, 
   Radio, 
   RadioGroup, 
   FormControlLabel, 
   FormControl, 
-  Button 
+  Button,
+  Paper,
+  Typography
 } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import CloseIcon from '@mui/icons-material/Close';
 
 const ArgumentForm = ({ onSubmit, onCancel, initialData, onGenerateAI }) => {
   const [formData, setFormData] = useState(initialData);
+  const [fallacyResult, setFallacyResult] = useState(null);
+  const [hasBeenChecked, setHasBeenChecked] = useState(false);
 
   const handleAIGenerate = async (type) => {
     try {
@@ -22,6 +28,27 @@ const ArgumentForm = ({ onSubmit, onCancel, initialData, onGenerateAI }) => {
       }
     } catch (error) {
       console.error("Chyba při komunikaci s AI:", error);
+    }
+  };
+
+  const handleSendClick = async () => {
+    if (hasBeenChecked) {
+      onSubmit(formData);
+      return;
+    }
+
+    try {
+      const data = await api.testFallacy({ text: formData.text });
+      console.log(data);
+      if (data && data.score > 0.75) {
+        setFallacyResult(data);
+        setHasBeenChecked(true);
+      } else {
+        onSubmit(formData);
+      }
+    } catch (error) {
+      console.error("Error when checking fallacy", error);
+      setHasBeenChecked(true);
     }
   };
 
@@ -68,6 +95,33 @@ const ArgumentForm = ({ onSubmit, onCancel, initialData, onGenerateAI }) => {
           />
         </RadioGroup>
       </FormControl>
+      {fallacyResult && (
+        <Paper 
+          variant="outlined" 
+          sx={{ 
+            p: 1.5, 
+            bgcolor: '#fff9c4', 
+            borderColor: '#fff59d', 
+            borderRadius: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 0.5
+          }}
+        >
+          <Typography 
+            variant="subtitle2" 
+            color="warning.dark" 
+            sx={{ fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: 1 }}
+          >
+            Fallacy detected!
+          </Typography>
+          {fallacyResult.explanation && (
+            <Typography variant="body2" color="text.primary" sx={{ fontStyle: 'italic' }}>
+              <strong>Explanation:</strong> {fallacyResult.explanation}
+            </Typography>
+          )}
+        </Paper>
+      )}
       <Box sx={{ display: 'flex', gap: 1 }}>
         {onGenerateAI && (
           <>
@@ -105,7 +159,7 @@ const ArgumentForm = ({ onSubmit, onCancel, initialData, onGenerateAI }) => {
           variant="contained" 
           color="primary"
           startIcon={<SendIcon />}
-          onClick={() => onSubmit(formData)}
+          onClick={handleSendClick}
         >
           Send
         </Button>
