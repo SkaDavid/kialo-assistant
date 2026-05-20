@@ -161,7 +161,7 @@ function App() {
 
     const findParentText = (argument) => {
         const assistantVersion = assistantInfo.argumentVersions.find(version => version.id == argument.parent);
-        return currentDebateInfo.argumentVersions.find(version => version.id == assistantVersion.kialoId).text.substring(0, 40) + "...";
+        return currentDebateInfo.argumentVersions.find(version => version.id == assistantVersion.kialoId)?.text.substring(0, 40) + "...";
     }
 
   return (

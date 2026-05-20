@@ -109,7 +109,7 @@ const getArgumentVersions = async () => {
 const getDebateId = () => {
     const element = document.querySelector(".hidden-claim-card-text");
     const id = element.id.split("-").pop().split(".")[0];
-    console.log(id);
+    return id;
     
 }
 
