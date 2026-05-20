@@ -107,7 +107,9 @@ const getArgumentVersions = async () => {
 }
 
 const getDebateId = () => {
-    return window.location.href.split('?')[0].split('/').pop().split('.')[0]; 
+    const element = document.querySelector(".hidden-claim-card-text");
+    const id = element.id.split("-").pop().split(".")[0];
+    console.log(id);
     
 }
 

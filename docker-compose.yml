@@ -133,7 +133,7 @@ services:
 
   kialo-assistant:
     build:
-      context: ./kialo-assistant
+      context: ./SAP-BE
     ports:
       - "8082:8082"
     environment:
@@ -158,11 +158,11 @@ services:
 
   web-client:
     build:
-      context: ./web-client
+      context: ./SAP-web-client
     ports:
       - "5173:5173"
     volumes:
-      - ./web-client:/app
+      - ./SAP-web-client:/app
       - /app/node_modules
     environment:
       - VITE_API_URL=http://localhost:8080
