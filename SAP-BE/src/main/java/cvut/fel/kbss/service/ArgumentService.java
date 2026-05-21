@@ -163,7 +163,7 @@ public class ArgumentService {
 
     public AIArgumentResponseDto generateArgument(String text, String type, List<ArgumentResponseDto> debate) throws APIkeyNotFoundException, ServiceNotRespondingException {
         String debateString = formatDebateToJson(debate);
-        String newArgumentText = debateGenerationClient.generateArgument(text, type, debateString);
+        String newArgumentText = debateGenerationClient.generateArgument(type,text, debateString);
 
         AIArgumentResponseDto result = new AIArgumentResponseDto();
         result.setText(newArgumentText);
