@@ -17,6 +17,9 @@ import SearchIcon from '@mui/icons-material/Search';
 function App() {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [completeDebate, setCompleteDebate] = useState("");
+
+    const [error, setError] = useState(null);
+    const [isImporting, setIsImporting] = useState(false);
     
     const [currentDebateInfo, setCurrentDebateInfo] = useState({ debateId: "", argumentVersions: [] });
     const [assistantInfo, setAssistantInfo] = useState({ isPresent: null, id: null, argumentVersions: [] });
@@ -98,10 +101,18 @@ function App() {
     }
 
     const handleImportDebate = async () => {
-        const data = await contentApi.getCompleteDebateInfo();
-        setCompleteDebate(JSON.stringify(data, null, 2));
-        const apiResult = await assistantApi.createDebate(data);
-        console.log(apiResult);
+        setIsImporting(true);
+        setError(null);
+        try{
+            const data = await contentApi.getCompleteDebateInfo();
+            setCompleteDebate(JSON.stringify(data, null, 2));
+            const apiResult = await assistantApi.createDebate(data);
+            handleReloadSidepanel();
+        } catch (err){
+            setError("Import was not succesfull. Try to navigate to main thesis and try again.")
+        } finally{
+            setIsImporting(false);
+        }
     }
 
     const handleSendToKialo = async (argument) => {
@@ -196,8 +207,8 @@ function App() {
             </Box>
             {!assistantInfo.present && (
             <Stack 
-                alignItems="center" 
-                justifyContent="center" 
+                alignitems="center" 
+                justifycontent="center" 
                 sx={{
                     p: 3,
                     border: "1px solid",
@@ -206,6 +217,12 @@ function App() {
                 }}
             >
                 <Typography variant="outlined" sx={{ fontWeight: "bold", mb: 3, textAlign: "center" }} >This debate is not imported yet.</Typography>
+                {isImporting ?
+                    <Typography variant="outlined" sx={{ fontWeight: "bold", mb: 3, textAlign: "center" }} >Importing the debate, this action might take a few seconds.</Typography>
+                    :
+                    <></>
+                }
+                
                 <Button variant="contained" color="primary" onClick={handleImportDebate} startIcon={<ImportExportIcon/>}>
                     Import debate
                 </Button>
