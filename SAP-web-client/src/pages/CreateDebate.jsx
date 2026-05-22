@@ -261,7 +261,7 @@ const CreateDebate = () => {
             <Grid size={{ xs: 12, md: 6 }}>
               <Paper variant="outlined" sx={{ p: 2, bgcolor: '#fff5f5', borderColor: '#fde8e8', minHeight: 250, borderRadius: 2 }}>
                 <Typography variant="subtitle1" sx={{ fontWeight: 'bold', color: '#d32f2f', mb: 2, textAlign: 'center' }}>
-                  Proti ({conArguments.length})
+                  Con ({conArguments.length})
                 </Typography>
                 <Stack spacing={2}>
                   {conArguments.map(arg => (
@@ -293,78 +293,5 @@ const CreateDebate = () => {
     </Container>
   );
 };
-
-const getResponse = () => {
-  return {
-    "thesis": "Bears are better than people",
-    "arguments": [
-        {
-            "id": 1,
-            "text": "Bears are better than people",
-            "type": "THESIS",
-            "parent": null,
-            "owner": {
-                "id": 0,
-                "username": "AI",
-                "debates": null
-            },
-            "debate": null
-        },
-        {
-            "id": 2,
-            "text": "Bears live harmoniously in nature and do not damage the environment the way humans often do.",
-            "type": "PRO",
-            "parent": 1,
-            "owner": {
-                "id": 0,
-                "username": "AI",
-                "debates": null
-            },
-            "debate": null
-        },
-        {
-            "id": 3,
-            "text": "Bears are strong, independent creatures that symbolize resilience and survival, qualities that can be admired more than some human traits.",
-            "type": "PRO",
-            "parent": 1,
-            "owner": {
-                "id": 0,
-                "username": "AI",
-                "debates": null
-            },
-            "debate": null
-        },
-        {
-            "id": 4,
-            "text": "People have created complex societies, technologies, and cultures that have advanced civilization in ways bears cannot.",
-            "type": "CON",
-            "parent": 1,
-            "owner": {
-                "id": 0,
-                "username": "AI",
-                "debates": null
-            },
-            "debate": null
-        },
-        {
-            "id": 5,
-            "text": "Humans possess empathy, reasoning, and moral capacities that allow them to solve problems and help others, making them more valuable to society than bears.",
-            "type": "CON",
-            "parent": 1,
-            "owner": {
-                "id": 0,
-                "username": "AI",
-                "debates": null
-            },
-            "debate": null
-        }
-    ],
-    "owner": {
-        "id": 0,
-        "username": "AI",
-        "debates": null
-    }
-}
-} 
 
 export default CreateDebate;

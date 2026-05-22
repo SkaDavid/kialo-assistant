@@ -119,7 +119,6 @@ public class OpenAIDebateGenerationClient implements DebateGenerationClient {
 
     private AIDebateResponse parseDebateResponse(HttpResponse<String> response, String thesisText) {
         JSONObject json = new JSONObject(response.body());
-        System.out.println(json.toString());
 
         JSONArray outputArray = json.getJSONArray("output");
         JSONObject firstOutput = outputArray.getJSONObject(0);

@@ -133,7 +133,7 @@ services:
 
   kialo-assistant:
     build:
-      context: ./SAP-BE
+      context: AP-BE
     ports:
       - "8082:8082"
     environment:

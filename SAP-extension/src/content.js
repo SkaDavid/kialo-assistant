@@ -61,8 +61,6 @@ const handleRedirectTo = (argumentId, sendResponse) => {
         
         const newUrl = `${window.location.origin}/${debateId}.${argumentId}`;
         
-        console.log("Redirecting tab to:", newUrl);
-        
         window.location.href = newUrl;
         
         sendResponse({ success: true });
@@ -127,15 +125,9 @@ const findLocations = async (parentClaimsId) => {
     const parentLocation = locations.find(location => location.targetId.split(".")[1] == parentClaimsId);
     result.push(parentLocation.id);
     let currentId = parentLocation.parentId;
-
-    console.log(result);
-    console.log(currentId);
-    console.log(parentLocation)
     
     while(currentId != null){
         const currentLocation = locations.find(location => location.targetId == currentId);
-        console.log("currentLocation:")
-        console.log(currentLocation)
         result.push(currentLocation.id);
         currentId = currentLocation.parentId;
     }
@@ -175,8 +167,6 @@ const parseArguments = (rawArguments, debateId) => {
         }
         parsedArguments.push(newArgument);
     });
-
-    console.log(parsedArguments);
     return parsedArguments;
 }
 

@@ -9,10 +9,10 @@
         <relativePath/>
     </parent>
     <groupId>cvut.fel.kbss</groupId>
-    <artifactId>SAP-BE</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
-    <name>kialo-assistant</name>
-    <description>Backend service for the Kialo Assistant browser extension</description>
+    <artifactId>AP-BE</artifactId>
+    <version>1.0</version>
+    <name>AP-server</name>
+    <description>Backend service for the AP application browser extension</description>
     <url/>
     <licenses>
         <license/>

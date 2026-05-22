@@ -39,7 +39,6 @@ const ArgumentForm = ({ onSubmit, onCancel, initialData, onGenerateAI }) => {
 
     try {
       const data = await api.testFallacy({ text: formData.text });
-      console.log(data);
       if (data && data.score > 0.75) {
         setFallacyResult(data);
         setHasBeenChecked(true);

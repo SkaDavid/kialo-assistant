@@ -30,7 +30,6 @@ const DebateDetail = () => {
   const fetchData = async () => {
     const data = await api.getArgument(id);
     setDebate(data);
-    console.log(data);
   };
 
   useEffect(() => { 
@@ -215,7 +214,7 @@ const DebateDetail = () => {
         <Grid size={{ xs: 12, md: 6 }}>
           <Paper variant="outlined" sx={{ p: 2, bgcolor: '#fff5f5', borderColor: '#fde8e8', minHeight: 300, borderRadius: 2 }}>
             <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#d32f2f', mb: 2, textAlign: 'center' }}>
-              Proti ({conArguments.length})
+              Con ({conArguments.length})
             </Typography>
             <Stack spacing={2}>
               {conArguments.map(child => (

@@ -41,12 +41,10 @@ function App() {
     const initData = async () => {
         try {
             const contentInfo = await contentApi.getDebateInfo();
-            console.log(contentInfo);
             setCurrentDebateInfo(contentInfo);
 
             if (contentInfo?.debateId) {
                 const assistInfo = await assistantApi.getDebateInfo(contentInfo.debateId);
-                console.log(assistInfo);
                 setAssistantInfo(assistInfo);
 
                 if (assistInfo?.argumentVersions) {
@@ -56,7 +54,6 @@ function App() {
                         const detail = await assistantApi.getArgument(argument.id);
                         fullArguments.push(detail);
                     }
-                    console.log("unknown args: " + JSON.stringify(fullArguments));
                     setUnknownArguments(fullArguments);
 
                     let foundModifiedArguments = [];
@@ -75,9 +72,7 @@ function App() {
                             }
                         }
                     });
-                    console.log("newArgs: " + JSON.stringify(foundNewArguments));
                     setNewArguments(foundNewArguments);
-                    console.log("ModifiedArgs: " + JSON.stringify(foundModifiedArguments));
                     setModifiedArguments(foundModifiedArguments);
                 }
             }
@@ -127,8 +122,6 @@ function App() {
                 argumentType: argument.type,
                 parentId: parentMapping.kialoId
             });
-            
-            console.log("Kialo response:", response)
         } catch(error) {
             console.error("Odesílání do Kiala selhalo:", error);
         }
@@ -143,7 +136,6 @@ function App() {
     };
 
     const handleAssistantPutArgument = async (argument) => {
-        console.log(argument);
         const dto = {
             id: argument.id,
             kialoVersion: argument.kialoVersion,
@@ -162,7 +154,6 @@ function App() {
             parentId: argument.parent.substring(argument.parent.indexOf(".") + 1), 
             debateId: assistantInfo.id
         }
-        console.log(dto);
         assistantApi.createArgument(dto);
     }
 
@@ -177,7 +168,7 @@ function App() {
 
   return (
     <Container disableGutters sx={{ p: 2, maxWidth: "90%" }}>
-      <Typography variant="h4" sx={{ fontWeight: "bold", mb: 3, textAlign: "center" }} >Kialo Assistant</Typography>
+      <Typography variant="h4" sx={{ fontWeight: "bold", mb: 3, textAlign: "center" }} >AP extension</Typography>
       {!isLoggedIn ? (
         <Stack 
             sx={{
