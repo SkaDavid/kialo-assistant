@@ -6,7 +6,7 @@ export default defineConfig({
     server: {
       proxy: {
       '/api': {
-        target: 'http://kialo-assistant:8080', // Interní název služby v Dockeru
+        target: 'http://kialo-assistant:8080',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, '')
       }

@@ -59,6 +59,7 @@ services:
       ADD_ACCOUNTS: false
       REALM_ID: termit
       GOOGLE_SECRET_KEY: ${GOOGLE_SECRET_KEY}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
     restart: always
     volumes:
       - auth-server:/opt/keycloak/data
@@ -158,11 +159,11 @@ services:
 
   web-client:
     build:
-      context: ./SAP-web-client
+      context: AP-web-client
     ports:
       - "5173:5173"
     volumes:
-      - ./SAP-web-client:/app
+      - ./AP-web-client:/app
       - /app/node_modules
     environment:
       - VITE_API_URL=http://localhost:8080

@@ -1883,7 +1883,7 @@
       "firstBrokerLoginFlowAlias": "first broker login",
       "config": {
         "hideOnLoginPage": "false",
-        "clientId": "617705478324-agc1n20sc82ad7orkt08v98lmb088gcb.apps.googleusercontent.com",
+        "clientId": "${GOOGLE_CLIENT_ID}",
         "acceptsPromptNoneForwardFromClient": "false",
         "disableUserInfo": "false",
         "filteredByClaim": "false",

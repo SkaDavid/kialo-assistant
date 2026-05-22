@@ -5,3 +5,6 @@
 - Download model.safetensors from "https://drive.google.com/drive/u/2/folders/1bAIetvpFpkq0zIOuoUn2xTVmc7sMIrb4"
 - Put model.safetensors into /fallacy-detector/checkpoint-1344 folder
 - run "docker compose up --build"
+
+
+http://localhost:1234/termit/sluzby/auth/realms/termit/broker/google/endpoint
