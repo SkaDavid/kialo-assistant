@@ -31,5 +31,5 @@ Základní konfigurace TermIt a Keycloak, společně s deployment scripty byly p
 - Otevřete http://localhost:5173
 
 ## Spuštění doplňku
-Stáhněte .zip soubor "AP-extension.zip" a rozbalte ho. Otevřete chrome://extensions a zvolte "Načíst rozbalené". Zvolte složku, kterou jste rozbalili. Program poté otevřete na stránce Kialo.com
+Stáhněte .zip soubor "AP-extension.zip" a rozbalte ho. Najděte složku dist a vložte ji do chrome://extensions. Program poté otevřete na stránce Kialo.com
 přes tlačítko puzzle v pravém horním rohu obrazovky Chrome.
